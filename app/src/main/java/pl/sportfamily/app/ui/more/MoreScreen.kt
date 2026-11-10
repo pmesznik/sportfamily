@@ -101,7 +101,7 @@ fun MoreScreen(
             if (data.persons.isEmpty()) Text("Brak osób", Modifier.padding(8.dp))
             data.persons.forEach { p ->
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                    IconBadge(Icons.Rounded.Person, Sf.colors.sport)
+                    IconBadge(Icons.Rounded.Person, Sf.colors.brand)
                     TextButton(onClick = { editing = p }, modifier = Modifier.weight(1f)) {
                         Text(p.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth())
                     }

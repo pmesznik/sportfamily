@@ -212,9 +212,9 @@ fun EmptyState(icon: ImageVector, title: String, text: String, modifier: Modifie
             Modifier
                 .size(72.dp)
                 .clip(CircleShape)
-                .background(Sf.colors.sport.container),
+                .background(Sf.colors.brand.container),
             contentAlignment = Alignment.Center,
-        ) { Icon(icon, null, tint = Sf.colors.sport.onContainer, modifier = Modifier.size(34.dp)) }
+        ) { Icon(icon, null, tint = Sf.colors.brand.onContainer, modifier = Modifier.size(34.dp)) }
         Spacer(Modifier.height(16.dp))
         Text(title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
         Spacer(Modifier.height(6.dp))

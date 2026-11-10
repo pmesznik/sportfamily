@@ -292,7 +292,7 @@ private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrenc
                             .aspectRatio(0.82f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (d == today) sf.sport.container else Color.Transparent)
+                            .background(if (d == today) sf.brand.container else Color.Transparent)
                             .clickable { onSelect(d) }
                             .padding(top = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -302,7 +302,7 @@ private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrenc
                             style = MaterialTheme.typography.labelLarge.copy(fontWeight = if (d == today) FontWeight.Bold else FontWeight.Medium),
                             color = when {
                                 !inMonth -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                                d == today -> sf.sport.onContainer
+                                d == today -> sf.brand.onContainer
                                 else -> MaterialTheme.colorScheme.onSurface
                             },
                         )

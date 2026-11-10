@@ -47,7 +47,7 @@ fun UpdateBanner() {
         onPauseOrDispose { }
     }
 
-    val tone = Sf.colors.sport
+    val tone = Sf.colors.brand
     AnimatedVisibility(visible = info != null && info?.versionCode != dismissedCode) {
         val u = info ?: return@AnimatedVisibility
         Column(

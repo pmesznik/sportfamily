@@ -229,7 +229,7 @@ private fun Detail(icon: androidx.compose.ui.graphics.vector.ImageVector, title:
 private fun TransportRow(label: String, person: String?, sub: String?) {
     val sf = Sf.colors
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconBadge(Icons.Rounded.DirectionsCar, if (person == null) sf.error else sf.sport)
+        IconBadge(Icons.Rounded.DirectionsCar, if (person == null) sf.error else sf.brand)
         Column(Modifier.padding(start = 12.dp)) {
             Text(
                 "$label: " + (person ?: "nikt nie przypisany"),

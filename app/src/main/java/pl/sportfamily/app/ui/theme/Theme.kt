@@ -31,6 +31,11 @@ data class SfColors(
     val family: Tone,
     val error: Tone,
     val neutral: Tone,
+    /** Kolor marki (granat w jasnym, pomarańcz w ciemnym): puste stany, aktualizacje, osoby. */
+    val brand: Tone,
+    /** Pomarańcz z logo dla najważniejszej akcji (przycisk Dodaj) i treść na nim. */
+    val accent: Color,
+    val onAccent: Color,
     val cardShadow: Boolean,
     val dark: Boolean = !cardShadow,
 ) {
@@ -50,7 +55,10 @@ private val LightSf = SfColors(
     extra = Tone(Color(0xFF8A70C7), Color(0xFFEEE9F8), Color(0xFF634BA0)),
     family = Tone(Color(0xFFD16B8A), Color(0xFFFBE8EE), Color(0xFF9C3F5C)),
     error = Tone(Color(0xFFC9433B), Color(0xFFFBE6E4), Color(0xFF9E2E27)),
-    neutral = Tone(Color(0xFF5A6478), Color(0xFFEEF1F6), Color(0xFF1B2230)),
+    neutral = Tone(Color(0xFF5B6075), Color(0xFFEFEDE8), Color(0xFF141B3D)),
+    brand = Tone(Color(0xFF141B3D), Color(0xFFE6E8F2), Color(0xFF141B3D)),
+    accent = Color(0xFFFF6A1F),
+    onAccent = Color(0xFF141B3D),
     cardShadow = true,
 )
 
@@ -61,36 +69,42 @@ private val DarkSf = SfColors(
     extra = Tone(Color(0xFFB6A2E8), Color(0xFF3B3657), Color(0xFFCFC2F1)),
     family = Tone(Color(0xFFEE9DB6), Color(0xFF4A3040), Color(0xFFF5C0D0)),
     error = Tone(Color(0xFFF08A82), Color(0xFF4C3036), Color(0xFFF6AFA9)),
-    neutral = Tone(Color(0xFFAEB7C9), Color(0xFF343C50), Color(0xFFEEF1F7)),
+    neutral = Tone(Color(0xFFAEB3C9), Color(0xFF232B4E), Color(0xFFF3F1EC)),
+    brand = Tone(Color(0xFFFF7A35), Color(0xFF4A2C1E), Color(0xFFFFC2A0)),
+    accent = Color(0xFFFF7A35),
+    onAccent = Color(0xFF141B3D),
     cardShadow = false,
 )
 
+// Paleta marki z logo: granat #141B3D, pomarańcz #FF6A1F, krem #FFF5E8.
 private val LightScheme = lightColorScheme(
-    primary = Color(0xFF3479C7), onPrimary = Color.White,
-    primaryContainer = Color(0xFFE3EDF9), onPrimaryContainer = Color(0xFF245A97),
-    secondary = Color(0xFF29966B), onSecondary = Color.White,
-    background = Color(0xFFF5F7FA), onBackground = Color(0xFF1B2230),
-    surface = Color(0xFFFFFFFF), onSurface = Color(0xFF1B2230),
-    surfaceVariant = Color(0xFFEEF1F6), onSurfaceVariant = Color(0xFF5A6478),
+    primary = Color(0xFF141B3D), onPrimary = Color.White,
+    primaryContainer = Color(0xFFE6E8F2), onPrimaryContainer = Color(0xFF141B3D),
+    secondary = Color(0xFFFF6A1F), onSecondary = Color(0xFF141B3D),
+    tertiary = Color(0xFFFF6A1F), onTertiary = Color(0xFF141B3D),
+    background = Color(0xFFF7F4EF), onBackground = Color(0xFF141B3D),
+    surface = Color(0xFFFFFFFF), onSurface = Color(0xFF141B3D),
+    surfaceVariant = Color(0xFFEFEDE8), onSurfaceVariant = Color(0xFF5B6075),
     surfaceContainer = Color(0xFFFFFFFF), surfaceContainerHigh = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF5F7FA), surfaceContainerHighest = Color(0xFFEEF1F6),
-    outline = Color(0xFFC3CAD6), outlineVariant = Color(0xFFDCE1EA),
+    surfaceContainerLow = Color(0xFFF7F4EF), surfaceContainerHighest = Color(0xFFEFEDE8),
+    outline = Color(0xFFC9C5BC), outlineVariant = Color(0xFFE4E0D8),
     error = Color(0xFFC9433B), errorContainer = Color(0xFFFBE6E4), onErrorContainer = Color(0xFF9E2E27),
-    secondaryContainer = Color(0xFFE3EDF9), onSecondaryContainer = Color(0xFF245A97),
+    secondaryContainer = Color(0xFFE6E8F2), onSecondaryContainer = Color(0xFF141B3D),
 )
 
 private val DarkScheme = darkColorScheme(
-    primary = Color(0xFF7FB2EC), onPrimary = Color(0xFF10223A),
-    primaryContainer = Color(0xFF2C3E5C), onPrimaryContainer = Color(0xFFA9CCF4),
-    secondary = Color(0xFF5CC79B), onSecondary = Color(0xFF0E2A1F),
-    background = Color(0xFF202633), onBackground = Color(0xFFEEF1F7),
-    surface = Color(0xFF2A3142), onSurface = Color(0xFFEEF1F7),
-    surfaceVariant = Color(0xFF343C50), onSurfaceVariant = Color(0xFFAEB7C9),
-    surfaceContainer = Color(0xFF2A3142), surfaceContainerHigh = Color(0xFF2F3649),
-    surfaceContainerLow = Color(0xFF242A38), surfaceContainerHighest = Color(0xFF343C50),
-    outline = Color(0xFF55607A), outlineVariant = Color(0xFF414A60),
+    primary = Color(0xFFFF7A35), onPrimary = Color(0xFF141B3D),
+    primaryContainer = Color(0xFF4A2C1E), onPrimaryContainer = Color(0xFFFFC2A0),
+    secondary = Color(0xFFFF7A35), onSecondary = Color(0xFF141B3D),
+    tertiary = Color(0xFFFF7A35), onTertiary = Color(0xFF141B3D),
+    background = Color(0xFF0E1330), onBackground = Color(0xFFF3F1EC),
+    surface = Color(0xFF182040), onSurface = Color(0xFFF3F1EC),
+    surfaceVariant = Color(0xFF232B4E), onSurfaceVariant = Color(0xFFAEB3C9),
+    surfaceContainer = Color(0xFF182040), surfaceContainerHigh = Color(0xFF1D2547),
+    surfaceContainerLow = Color(0xFF131A38), surfaceContainerHighest = Color(0xFF232B4E),
+    outline = Color(0xFF4A5274), outlineVariant = Color(0xFF2E3659),
     error = Color(0xFFF08A82), errorContainer = Color(0xFF4C3036), onErrorContainer = Color(0xFFF6AFA9),
-    secondaryContainer = Color(0xFF2C3E5C), onSecondaryContainer = Color(0xFFA9CCF4),
+    secondaryContainer = Color(0xFF2B3460), onSecondaryContainer = Color(0xFFE6E8F2),
 )
 
 private val tnum = "tnum"

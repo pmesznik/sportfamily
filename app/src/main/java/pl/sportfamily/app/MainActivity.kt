@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.DisposableEffect
+import pl.sportfamily.app.ui.theme.Sf
 import pl.sportfamily.app.ui.theme.ThemeMode
 import pl.sportfamily.app.ui.theme.ThemeSettings
 import androidx.activity.compose.setContent
@@ -167,15 +168,15 @@ private fun App(vm: MainViewModel = viewModel()) {
                 "today", "calendar" -> ExtendedFloatingActionButton(
                     onClick = { nav.navigate("edit?id=-1&day=${(if (route == "calendar") calendarDay else today).toEpochDay()}") },
                     icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Dodaj") },
-                    containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
                 "children" -> if (d.children.isNotEmpty()) ExtendedFloatingActionButton(
                     onClick = { childRequest = true }, icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Dziecko") },
-                    containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
                 "tasks" -> ExtendedFloatingActionButton(
                     onClick = { taskRequest = true }, icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Zadanie") },
-                    containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
             }
         },
