@@ -32,6 +32,7 @@ data class SfColors(
     val error: Tone,
     val neutral: Tone,
     val cardShadow: Boolean,
+    val dark: Boolean = !cardShadow,
 ) {
     fun of(c: Category): Tone = when (c) {
         Category.SPORT -> sport
@@ -136,4 +137,8 @@ fun SportFamilyTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable
 
 object Sf {
     val colors: SfColors @Composable get() = LocalSf.current
+
+    /** Logo dopasowane do aktywnego motywu aplikacji (nie systemu). */
+    val logoHorizontal: Int @Composable get() = if (LocalSf.current.dark) pl.sportfamily.app.R.drawable.logo_horizontal_dark else pl.sportfamily.app.R.drawable.logo_horizontal
+    val logoSymbol: Int @Composable get() = if (LocalSf.current.dark) pl.sportfamily.app.R.drawable.logo_symbol_dark else pl.sportfamily.app.R.drawable.logo_symbol
 }

@@ -10,6 +10,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.BrightnessAuto
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.runtime.collectAsState
+import pl.sportfamily.app.ui.theme.ThemeMode
+import pl.sportfamily.app.ui.theme.ThemeSettings
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.AlertDialog
@@ -35,6 +45,7 @@ import pl.sportfamily.app.ui.components.SectionHeader
 import pl.sportfamily.app.ui.components.SfCard
 import pl.sportfamily.app.ui.theme.Sf
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen(
     data: PlannerData,
@@ -52,6 +63,38 @@ fun MoreScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text("Więcej", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 8.dp))
+
+        SectionHeader("Wygląd")
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val mode by ThemeSettings.mode.collectAsState()
+        SfCard(Modifier.fillMaxWidth()) {
+            Text("Motyw", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Systemowy zmienia się razem z ustawieniem telefonu, np. wieczorem na ciemny.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(top = 12.dp)) {
+                ThemeMode.entries.forEachIndexed { i, m ->
+                    SegmentedButton(
+                        selected = mode == m,
+                        onClick = { ThemeSettings.set(context, m) },
+                        shape = SegmentedButtonDefaults.itemShape(i, ThemeMode.entries.size),
+                        icon = {
+                            SegmentedButtonDefaults.Icon(active = mode == m) {
+                                Icon(
+                                    when (m) {
+                                        ThemeMode.SYSTEM -> Icons.Rounded.BrightnessAuto
+                                        ThemeMode.LIGHT -> Icons.Rounded.LightMode
+                                        ThemeMode.DARK -> Icons.Rounded.DarkMode
+                                    },
+                                    null, modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
+                                )
+                            }
+                        },
+                    ) { Text(m.label, maxLines = 1) }
+                }
+            }
+        }
 
         SectionHeader("Kto wozi dzieci", "Dodaj") { editing = Person(name = "") }
         SfCard(Modifier.fillMaxWidth(), padding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
@@ -86,7 +129,7 @@ fun MoreScreen(
         val (status, check) = pl.sportfamily.app.update.rememberUpdateCheck()
         SfCard(Modifier.fillMaxWidth()) {
             androidx.compose.foundation.Image(
-                androidx.compose.ui.res.painterResource(pl.sportfamily.app.R.drawable.logo_horizontal),
+                androidx.compose.ui.res.painterResource(Sf.logoHorizontal),
                 contentDescription = "SportFamily",
                 modifier = Modifier.padding(bottom = 12.dp).size(width = 170.dp, height = 44.dp),
                 alignment = Alignment.CenterStart,

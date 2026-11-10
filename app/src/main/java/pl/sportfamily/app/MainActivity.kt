@@ -1,7 +1,13 @@
 package pl.sportfamily.app
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
+import pl.sportfamily.app.ui.theme.ThemeMode
+import pl.sportfamily.app.ui.theme.ThemeSettings
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.fadeIn
@@ -70,8 +76,24 @@ import java.time.LocalDate
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeSettings.load(this)
         enableEdgeToEdge()
-        setContent { SportFamilyTheme { App() } }
+        setContent {
+            val mode by ThemeSettings.mode.collectAsState()
+            val dark = when (mode) {
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+            }
+            // Jasne lub ciemne ikony paska stanu zgodnie z wybranym motywem, nie z systemem.
+            DisposableEffect(dark) {
+                val style = if (dark) SystemBarStyle.dark(Color.TRANSPARENT)
+                else SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+                onDispose { }
+            }
+            SportFamilyTheme(dark = dark) { App() }
+        }
     }
 }
 
