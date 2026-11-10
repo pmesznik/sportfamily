@@ -12,6 +12,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BrightnessAuto
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SegmentedButton
@@ -53,7 +55,19 @@ fun MoreScreen(
     onSavePerson: (Person) -> Unit,
     onDeletePerson: (Person) -> Unit,
     onSeedDemo: () -> Unit,
+    importDraft: pl.sportfamily.app.ui.ImportDraft? = null,
+    message: String? = null,
+    onImport: (android.net.Uri) -> Unit = {},
+    onExport: (android.net.Uri) -> Unit = {},
+    onConfirmImport: (pl.sportfamily.app.domain.ImportOptions, Boolean) -> Unit = { _, _ -> },
+    onDismissImport: () -> Unit = {},
 ) {
+    val pickFile = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) onImport(uri) }
+    val createFile = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.CreateDocument(XLSX_MIME)
+    ) { uri -> if (uri != null) onExport(uri) }
     var editing by remember { mutableStateOf<Person?>(null) }
     var confirmDemo by remember { mutableStateOf(false) }
     Column(
@@ -114,6 +128,31 @@ fun MoreScreen(
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, start = 4.dp),
         )
 
+        SectionHeader("Plan z Excela")
+        SfCard(Modifier.fillMaxWidth()) {
+            Text(
+                "Import: plan lekcji lub zajęć w układzie dni tygodnia w kolumnach. Godzina może być w pierwszej kolumnie albo w komórce, np. \"Tenis 14:30 - 16:00\". Przed zapisaniem zobaczysz podgląd.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                "Eksport: plan tygodnia każdego dziecka (ten sam układ, do ponownego importu) i lista najbliższych 7 dni.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Row(Modifier.padding(top = 12.dp), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { pickFile.launch(arrayOf(XLSX_MIME, "application/vnd.ms-excel", "application/octet-stream")) }) {
+                    Icon(Icons.Rounded.FileUpload, null); Text("  Importuj")
+                }
+                OutlinedButton(onClick = { createFile.launch("SportFamily_plan_${java.time.LocalDate.now()}.xlsx") }) {
+                    Icon(Icons.Rounded.FileDownload, null); Text("  Eksportuj")
+                }
+            }
+            if (message != null) {
+                Text(message, style = MaterialTheme.typography.bodySmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                    color = Sf.colors.brand.onContainer, modifier = Modifier.padding(top = 10.dp))
+            }
+        }
+
         SectionHeader("Dane")
         SfCard(Modifier.fillMaxWidth()) {
             Text(
@@ -150,6 +189,9 @@ fun MoreScreen(
         Text("SportFamily 0.1", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 24.dp, bottom = 80.dp))
     }
 
+    if (importDraft != null) {
+        ImportPreviewDialog(importDraft, data.children, java.time.LocalDate.now(), onConfirmImport, onDismissImport)
+    }
     editing?.let { p ->
         var name by remember(p) { mutableStateOf(p.name) }
         AlertDialog(
@@ -170,3 +212,5 @@ fun MoreScreen(
         )
     }
 }
+
+private const val XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

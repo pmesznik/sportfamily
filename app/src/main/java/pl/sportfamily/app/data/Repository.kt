@@ -42,6 +42,9 @@ class Repository(private val dao: PlannerDao) {
     suspend fun cancelOccurrence(eventId: Long, day: LocalDate) = dao.insertException(EventException(eventId, day.toEpochDay()))
     suspend fun toggleCheck(itemId: Long, day: LocalDate) = dao.toggleCheck(itemId, day.toEpochDay())
 
+    suspend fun importPlan(childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>) =
+        dao.importEvents(pl.sportfamily.app.domain.PlanImport.IMPORT_TAG, childId, replace, events)
+
     suspend fun saveTask(task: TaskEntity) = dao.upsertTask(task)
     suspend fun deleteTask(task: TaskEntity) = dao.deleteTask(task)
 

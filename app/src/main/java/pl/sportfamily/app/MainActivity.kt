@@ -220,7 +220,16 @@ private fun App(vm: MainViewModel = viewModel()) {
                 )
             }
             composable("more") {
-                MoreScreen(d, pad, onSavePerson = vm::savePerson, onDeletePerson = vm::deletePerson, onSeedDemo = vm::seedDemo)
+                val draft by vm.importDraft.collectAsState()
+                val msg by vm.message.collectAsState()
+                MoreScreen(
+                    d, pad, onSavePerson = vm::savePerson, onDeletePerson = vm::deletePerson, onSeedDemo = vm::seedDemo,
+                    importDraft = draft, message = msg,
+                    onImport = { vm.message.value = null; vm.readImport(it) },
+                    onExport = { vm.message.value = null; vm.export(it) },
+                    onConfirmImport = { o, r -> vm.confirmImport(o, r) },
+                    onDismissImport = { vm.importDraft.value = null },
+                )
             }
             composable(
                 "event/{id}/{day}",

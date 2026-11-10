@@ -3,7 +3,16 @@ package pl.sportfamily.app.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import android.net.Uri
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
+import pl.sportfamily.app.data.xlsx.Xlsx
+import pl.sportfamily.app.domain.ImportOptions
+import pl.sportfamily.app.domain.ParsedPlan
+import pl.sportfamily.app.domain.PlanExport
+import pl.sportfamily.app.domain.PlanImport
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
@@ -51,6 +60,46 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun seedDemo() = viewModelScope.launch { repo.seedDemo() }
 
+    // ---------- Import i eksport planu z Excela ----------
+
+    /** Wczytany plan czekający na zatwierdzenie w podglądzie. */
+    val importDraft = MutableStateFlow<ImportDraft?>(null)
+    /** Krótki komunikat dla użytkownika (wynik importu lub eksportu). */
+    val message = MutableStateFlow<String?>(null)
+
+    fun readImport(uri: Uri) = viewModelScope.launch {
+        val ctx = getApplication<Application>()
+        val result = withContext(Dispatchers.IO) {
+            runCatching {
+                val sheets = ctx.contentResolver.openInputStream(uri)!!.use { Xlsx.read(it) }
+                val parsed = sheets.map { it.name to PlanImport.parse(it.rows) }
+                parsed.maxByOrNull { (_, p) -> p.sections.sumOf { it.items.size } }
+                    ?: error("Plik nie ma żadnego arkusza")
+            }
+        }
+        result.onSuccess { (sheet, plan) ->
+            if (plan.sections.isEmpty()) message.value = plan.warnings.firstOrNull() ?: "W pliku nie ma planu do zaimportowania."
+            else importDraft.value = ImportDraft(plan, sheet)
+        }.onFailure { message.value = "Nie udało się odczytać pliku: ${it.message ?: "nieznany błąd"}" }
+    }
+
+    fun confirmImport(options: ImportOptions, replace: Boolean) = viewModelScope.launch {
+        val plan = importDraft.value?.plan ?: return@launch
+        val events = PlanImport.toEvents(plan, options).map { it.event to it.childIds }
+        val n = repo.importPlan(options.childId, replace, events)
+        importDraft.value = null
+        message.value = "Zaimportowano $n zajęć do kalendarza."
+    }
+
+    fun export(uri: Uri) = viewModelScope.launch {
+        val ctx = getApplication<Application>()
+        val d = data.value ?: return@launch
+        val r = withContext(Dispatchers.IO) {
+            runCatching { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { Xlsx.write(it, PlanExport.sheets(d, LocalDate.now())) } }
+        }
+        message.value = if (r.isSuccess) "Plan zapisany do pliku Excel." else "Nie udało się zapisać pliku: ${r.exceptionOrNull()?.message}"
+    }
+
     suspend fun loadEvent(id: Long): EventDraftSource? {
         val e = repo.getEvent(id) ?: return null
         return EventDraftSource(e, repo.getEventChildIds(id), repo.getChecklist(id))
@@ -61,3 +110,5 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 }
 
 data class EventDraftSource(val event: EventEntity, val childIds: List<Long>, val checklist: List<ChecklistItem>)
+
+data class ImportDraft(val plan: ParsedPlan, val sheetName: String)

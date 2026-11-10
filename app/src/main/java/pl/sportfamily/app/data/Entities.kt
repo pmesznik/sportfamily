@@ -49,6 +49,8 @@ data class EventEntity(
     val dropOffPersonId: Long? = null,
     val pickUpPersonId: Long? = null,
     val notes: String = "",
+    /** Znacznik wydarzeń z importu planu (ponowny import zastępuje je zamiast dublować). */
+    val importTag: String? = null,
 )
 
 @Entity(

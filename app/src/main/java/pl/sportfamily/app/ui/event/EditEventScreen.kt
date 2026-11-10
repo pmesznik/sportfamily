@@ -131,6 +131,7 @@ fun EditEventScreen(
     var dropOff by rememberSaveable { mutableStateOf<Long?>(null) }
     var pickUp by rememberSaveable { mutableStateOf<Long?>(null) }
     var notes by rememberSaveable { mutableStateOf("") }
+    var importTag by rememberSaveable { mutableStateOf<String?>(null) }
     val checklist = remember { mutableStateListOf<ChecklistItem>() }
     var newItem by rememberSaveable { mutableStateOf("") }
 
@@ -148,7 +149,7 @@ fun EditEventScreen(
                 repeatDays = e.repeatDays; repeatUntil = e.repeatUntilDay?.let { LocalDate.ofEpochDay(it) }
                 place = e.placeName; address = e.address
                 travel = if (e.travelMinutes > 0) e.travelMinutes.toString() else ""; buffer = e.bufferMinutes.toString()
-                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes
+                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; importTag = e.importTag
                 checklist.clear(); checklist.addAll(src.checklist)
             }
             loaded = true
@@ -179,6 +180,7 @@ fun EditEventScreen(
             dropOffPersonId = dropOff,
             pickUpPersonId = pickUp,
             notes = notes.trim(),
+            importTag = importTag,
         )
         onSave(ev, childIds.toList(), checklist.toList())
     }

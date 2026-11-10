@@ -87,6 +87,17 @@ interface PlannerDao {
     @Query("SELECT COUNT(*) FROM checklist_checks WHERE itemId = :itemId AND day = :day")
     suspend fun isChecked(itemId: Long, day: Long): Int
 
+    /** Usuwa wcześniej zaimportowany plan danego dziecka. */
+    @Query("DELETE FROM events WHERE importTag = :tag AND id IN (SELECT eventId FROM event_children WHERE childId = :childId)")
+    suspend fun deleteImported(tag: String, childId: Long): Int
+
+    @Transaction
+    suspend fun importEvents(tag: String, childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>): Int {
+        if (replace) deleteImported(tag, childId)
+        events.forEach { (e, kids) -> saveEvent(e, kids, emptyList()) }
+        return events.size
+    }
+
     // Zadania
     @Upsert suspend fun upsertTask(task: TaskEntity): Long
     @Delete suspend fun deleteTask(task: TaskEntity)

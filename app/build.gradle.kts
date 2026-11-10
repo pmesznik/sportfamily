@@ -23,8 +23,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Każde wydanie: zwiększ versionCode o 1 (aplikacja porównuje go z update.json).
-        versionCode = 7
-        versionName = "0.7"
+        versionCode = 8
+        versionName = "0.8"
         buildConfigField("String", "UPDATE_MANIFEST_URL", "\"${update.getProperty("manifestUrl", "")}\"")
     }
 
