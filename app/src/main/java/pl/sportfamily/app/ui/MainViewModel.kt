@@ -112,13 +112,24 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     suspend fun loadEvent(id: Long): EventDraftSource? {
         val e = repo.getEvent(id) ?: return null
-        return EventDraftSource(e, repo.getEventChildIds(id), repo.getChecklist(id))
+        return EventDraftSource(e, repo.getEventChildIds(id), repo.getChecklist(id), repo.getDayRules(id))
     }
 
-    fun saveEvent(event: EventEntity, childIds: List<Long>, checklist: List<ChecklistItem>) =
-        viewModelScope.launch { repo.saveEvent(event, childIds, checklist) }
+    fun saveEvent(event: EventEntity, childIds: List<Long>, checklist: List<ChecklistItem>, rules: List<pl.sportfamily.app.data.EventDayRule> = emptyList()) =
+        viewModelScope.launch { repo.saveEvent(event, childIds, checklist, rules) }
+
+    /** Zmiana osób tylko dla jednego terminu. Obie wartości null = usuń zmianę. */
+    fun setOverride(eventId: Long, day: LocalDate, dropOff: Long?, pickUp: Long?) = viewModelScope.launch {
+        if (dropOff == null && pickUp == null) repo.clearOverride(eventId, day)
+        else repo.setOverride(pl.sportfamily.app.data.OccurrenceOverride(eventId, day.toEpochDay(), dropOffPersonId = dropOff, pickUpPersonId = pickUp))
+    }
 }
 
-data class EventDraftSource(val event: EventEntity, val childIds: List<Long>, val checklist: List<ChecklistItem>)
+data class EventDraftSource(
+    val event: EventEntity,
+    val childIds: List<Long>,
+    val checklist: List<ChecklistItem>,
+    val dayRules: List<pl.sportfamily.app.data.EventDayRule> = emptyList(),
+)
 
 data class ImportDraft(val plan: ParsedPlan, val sheetName: String)

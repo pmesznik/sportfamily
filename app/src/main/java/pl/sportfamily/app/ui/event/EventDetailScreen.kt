@@ -80,12 +80,14 @@ fun EventDetailScreen(
     onToggleCheck: (Long, LocalDate) -> Unit,
     onCancelOccurrence: () -> Unit,
     onDelete: () -> Unit,
+    onSetOverride: (Long?, Long?) -> Unit = { _, _ -> },
 ) {
     val occ: Occurrence? = remember(data, eventId, day) {
         Planner.occurrences(data.copy(events = data.events.filter { it.id == eventId }), day, day).firstOrNull()
     }
     var confirmDelete by remember { mutableStateOf(false) }
     var confirmCancel by remember { mutableStateOf(false) }
+    var changingDay by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val sf = Sf.colors
 
@@ -149,12 +151,19 @@ fun EventDetailScreen(
                 }
             }
 
-            if (occ.needsTransport || occ.dropOff != null || occ.pickUp != null) {
+            val repeating = occ.event.repeatDays != 0
+            if (occ.needsTransport || occ.dropOff != null || occ.pickUp != null || (repeating && data.persons.isNotEmpty())) {
                 SectionHeader("Transport")
                 SfCard(Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (occ.changedThisDay) ToneChip("Zmiana tylko na ten dzień", sf.important, Icons.Rounded.Edit)
                         TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
                         TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
+                        if (repeating && data.persons.isNotEmpty()) {
+                            OutlinedButton(onClick = { changingDay = true }, shape = RoundedCornerShape(12.dp)) {
+                                Text(if (occ.changedThisDay) "Zmień lub cofnij zmianę na ten dzień" else "Zmień na ten dzień")
+                            }
+                        }
                     }
                 }
             }
@@ -195,6 +204,32 @@ fun EventDetailScreen(
         }
     }
 
+    if (changingDay && occ != null) {
+        val ov = data.overrides.firstOrNull { it.eventId == occ.event.id && it.day == day.toEpochDay() }
+        var drop by remember { mutableStateOf(ov?.dropOffPersonId) }
+        var pick by remember { mutableStateOf(ov?.pickUpPersonId) }
+        val baseDrop = occ.dayRule?.dropOffPersonId ?: occ.event.dropOffPersonId
+        val basePick = occ.dayRule?.pickUpPersonId ?: occ.event.pickUpPersonId
+        AlertDialog(
+            onDismissRequest = { changingDay = false },
+            title = { Text("Kto jedzie ${day.longLabel().lowercase()}") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PersonChoice("Zawozi", drop, data.persons, "jak w serii (${personName(data.persons, null, baseDrop)})") { drop = it }
+                    PersonChoice("Odbiera", pick, data.persons, "jak w serii (${personName(data.persons, null, basePick)})") { pick = it }
+                    Text("Zmiana dotyczy tylko tego terminu. Pozostałe terminy serii zostają bez zmian.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            },
+            confirmButton = { TextButton(onClick = { changingDay = false; onSetOverride(drop, pick) }) { Text("Zapisz") } },
+            dismissButton = {
+                Row {
+                    if (ov != null) TextButton(onClick = { changingDay = false; onSetOverride(null, null) }) { Text("Cofnij zmianę") }
+                    TextButton(onClick = { changingDay = false }) { Text("Anuluj") }
+                }
+            },
+        )
+    }
     if (confirmDelete && occ != null) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },

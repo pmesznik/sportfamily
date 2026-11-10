@@ -106,7 +106,7 @@ fun EditEventScreen(
     eventId: Long?,
     initialDay: LocalDate,
     load: suspend (Long) -> EventDraftSource?,
-    onSave: (EventEntity, List<Long>, List<ChecklistItem>) -> Unit,
+    onSave: (EventEntity, List<Long>, List<ChecklistItem>, List<pl.sportfamily.app.data.EventDayRule>) -> Unit,
     onClose: () -> Unit,
 ) {
     val sf = Sf.colors
@@ -124,6 +124,8 @@ fun EditEventScreen(
     var end by rememberSaveable { mutableIntStateOf(17 * 60 + 30) }
     var repeatDays by rememberSaveable { mutableIntStateOf(0) }
     var everyWeeks by rememberSaveable { mutableIntStateOf(1) }
+    val dayRules = remember { androidx.compose.runtime.mutableStateMapOf<Int, pl.sportfamily.app.data.EventDayRule>() }
+    var editingDay by remember { mutableStateOf<Int?>(null) }
     var repeatUntil by rememberSaveable { mutableStateOf<LocalDate?>(null) }
     var place by rememberSaveable { mutableStateOf("") }
     var address by rememberSaveable { mutableStateOf("") }
@@ -152,6 +154,7 @@ fun EditEventScreen(
                 travel = if (e.travelMinutes > 0) e.travelMinutes.toString() else ""; buffer = e.bufferMinutes.toString()
                 dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; importTag = e.importTag
                 checklist.clear(); checklist.addAll(src.checklist)
+                dayRules.clear(); src.dayRules.forEach { dayRules[it.weekday] = it }
             }
             loaded = true
         }
@@ -184,7 +187,9 @@ fun EditEventScreen(
             notes = notes.trim(),
             importTag = importTag,
         )
-        onSave(ev, childIds.toList(), checklist.toList())
+        val rules = if (repeatDays == 0) emptyList()
+            else dayRules.values.filter { repeatDays and (1 shl (it.weekday - 1)) != 0 }
+        onSave(ev, childIds.toList(), checklist.toList(), rules)
     }
 
     Scaffold(
@@ -280,27 +285,12 @@ fun EditEventScreen(
 
             if (!multiDay) {
                 SectionHeader("Powtarzanie")
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(0 to "Jednorazowo", 1 to "Co tydzień", 2 to "Co 2 tygodnie", 3 to "Co 3 tygodnie", 4 to "Co 4 tygodnie").forEach { (n, label) ->
-                        val sel = if (n == 0) repeatDays == 0 else repeatDays != 0 && everyWeeks == n
-                        FilterChip(
-                            selected = sel,
-                            onClick = {
-                                if (n == 0) repeatDays = 0
-                                else {
-                                    everyWeeks = n
-                                    // Pierwsze włączenie: zaznacz dzień tygodnia z daty wydarzenia.
-                                    if (repeatDays == 0) repeatDays = 1 shl (date.dayOfWeek.value - 1)
-                                }
-                            },
-                            label = { Text(label) },
-                            modifier = Modifier.heightIn(min = 40.dp),
-                        )
-                    }
-                }
-            }
-            if (!multiDay && repeatDays != 0) {
-                Label("W które dni (można kilka, np. wtorek i czwartek)")
+                Text(
+                    if (repeatDays == 0) "Zaznacz dni, w które są zajęcia, np. poniedziałek, wtorek i piątek. Bez zaznaczenia wydarzenie jest jednorazowe."
+                    else "Zajęcia powtarzają się w zaznaczone dni.",
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                     WeekdayShort.forEachIndexed { i, d ->
                         val bit = 1 shl i
@@ -313,7 +303,10 @@ fun EditEventScreen(
                                 .clip(shape)
                                 .background(if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
                                 .border(1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, shape)
-                                .toggleable(value = on, role = Role.Checkbox, onValueChange = { repeatDays = repeatDays xor bit }),
+                                .toggleable(value = on, role = Role.Checkbox, onValueChange = {
+                                    repeatDays = repeatDays xor bit
+                                    if (!on) multiDay = false
+                                }),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text(d, style = MaterialTheme.typography.labelLarge,
@@ -322,7 +315,25 @@ fun EditEventScreen(
                     }
                 }
                 if (repeatDays != 0) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 10.dp)) {
+                        listOf(1 to "Co tydzień", 2 to "Co 2 tygodnie", 3 to "Co 3 tygodnie", 4 to "Co 4 tygodnie").forEach { (n, label) ->
+                            FilterChip(selected = everyWeeks == n, onClick = { everyWeeks = n }, label = { Text(label) }, modifier = Modifier.heightIn(min = 40.dp))
+                        }
+                        FilterChip(selected = false, onClick = { repeatDays = 0; dayRules.clear() }, label = { Text("Jednorazowo") }, modifier = Modifier.heightIn(min = 40.dp))
+                    }
                     PickRow(Icons.Rounded.CalendarToday, "Do kiedy", repeatUntil?.longLabel() ?: "bez końca") { picker = "until" }
+
+                    Label("Godziny i osoby w poszczególne dni")
+                    SfCard(Modifier.fillMaxWidth(), padding = PaddingValues(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp)) {
+                        (1..7).filter { repeatDays and (1 shl (it - 1)) != 0 }.forEach { wd ->
+                            DayRuleRow(wd, dayRules[wd], start, end, dropOff, pickUp, data.persons, allDay) { editingDay = wd }
+                        }
+                    }
+                    Text(
+                        "Domyślnie każdy dzień ma godziny z sekcji Kiedy i osoby z sekcji Kto wiezie. Stuknij Zmień, jeśli w któryś dzień jest inaczej.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 6.dp),
+                    )
                 }
             }
 
@@ -358,7 +369,7 @@ fun EditEventScreen(
             }
 
             if (data.persons.isNotEmpty()) {
-                SectionHeader("Kto wiezie")
+                SectionHeader(if (repeatDays != 0) "Kto wiezie (domyślnie)" else "Kto wiezie")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PersonDropdown("Zawozi", dropOff, data, Modifier.weight(1f)) { dropOff = it }
                     PersonDropdown("Odbiera", pickUp, data, Modifier.weight(1f)) { pickUp = it }
@@ -399,6 +410,14 @@ fun EditEventScreen(
                 Text("Zapisz")
             }
         }
+    }
+
+    editingDay?.let { wd ->
+        DayRuleDialog(
+            wd, dayRules[wd], start, end, dropOff, pickUp, data.persons, allDay,
+            onDismiss = { editingDay = null },
+            onSave = { r -> if (r == null) dayRules.remove(wd) else dayRules[wd] = r; editingDay = null },
+        )
     }
 
     when (picker) {

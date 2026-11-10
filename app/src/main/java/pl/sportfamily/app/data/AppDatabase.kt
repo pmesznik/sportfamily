@@ -11,8 +11,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
     entities = [
         Child::class, Person::class, EventEntity::class, EventChild::class, EventException::class,
         ChecklistItem::class, ChecklistCheck::class, TaskEntity::class, SchoolDayOff::class,
+        EventDayRule::class, OccurrenceOverride::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -21,13 +22,21 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "sportfamily.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .build()
 
         /** v0.8: znacznik importu planu. Dane użytkownika zostają. */
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE events ADD COLUMN importTag TEXT")
+            }
+        }
+
+        /** v0.11: godziny i osoby osobno dla dni tygodnia oraz zmiany pojedynczych terminów. */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `event_day_rules` (`eventId` INTEGER NOT NULL, `weekday` INTEGER NOT NULL, `startMinute` INTEGER, `endMinute` INTEGER, `dropOffPersonId` INTEGER, `pickUpPersonId` INTEGER, PRIMARY KEY(`eventId`, `weekday`), FOREIGN KEY(`eventId`) REFERENCES `events`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `occurrence_overrides` (`eventId` INTEGER NOT NULL, `day` INTEGER NOT NULL, `startMinute` INTEGER, `endMinute` INTEGER, `dropOffPersonId` INTEGER, `pickUpPersonId` INTEGER, PRIMARY KEY(`eventId`, `day`), FOREIGN KEY(`eventId`) REFERENCES `events`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
             }
         }
 

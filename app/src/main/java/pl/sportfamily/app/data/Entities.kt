@@ -117,3 +117,39 @@ data class SchoolDayOff(
     @PrimaryKey val day: Long,
     val label: String,
 )
+
+/** Osoba "nikt" w ustawieniach dnia i zmianach terminu (null = jak w serii). */
+const val NOBODY = 0L
+
+/**
+ * Ustawienia jednego dnia tygodnia w serii: inne godziny lub inne osoby niż domyślne.
+ * weekday: 1 = poniedziałek ... 7 = niedziela. Null = jak w serii, [NOBODY] = nikt.
+ */
+@Entity(
+    tableName = "event_day_rules",
+    primaryKeys = ["eventId", "weekday"],
+    foreignKeys = [ForeignKey(EventEntity::class, ["id"], ["eventId"], onDelete = ForeignKey.CASCADE)],
+)
+data class EventDayRule(
+    val eventId: Long,
+    val weekday: Int,
+    val startMinute: Int? = null,
+    val endMinute: Int? = null,
+    val dropOffPersonId: Long? = null,
+    val pickUpPersonId: Long? = null,
+)
+
+/** Zmiana jednego konkretnego terminu (np. w ten piątek wiezie Babcia). Null = bez zmiany, [NOBODY] = nikt. */
+@Entity(
+    tableName = "occurrence_overrides",
+    primaryKeys = ["eventId", "day"],
+    foreignKeys = [ForeignKey(EventEntity::class, ["id"], ["eventId"], onDelete = ForeignKey.CASCADE)],
+)
+data class OccurrenceOverride(
+    val eventId: Long,
+    val day: Long,
+    val startMinute: Int? = null,
+    val endMinute: Int? = null,
+    val dropOffPersonId: Long? = null,
+    val pickUpPersonId: Long? = null,
+)

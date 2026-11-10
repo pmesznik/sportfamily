@@ -27,6 +27,10 @@ data class PlannerData(
     val tasks: List<TaskEntity> = emptyList(),
     /** Ręcznie dodane dni wolne od lekcji. */
     val customDaysOff: List<CustomDayOff> = emptyList(),
+    /** Inne godziny lub osoby w wybrane dni tygodnia serii. */
+    val dayRules: List<pl.sportfamily.app.data.EventDayRule> = emptyList(),
+    /** Zmiany pojedynczych terminów. */
+    val overrides: List<pl.sportfamily.app.data.OccurrenceOverride> = emptyList(),
     /** Województwo do terminu ferii; null = ferie nieuwzględniane. */
     val voivodeship: Voivodeship? = null,
 ) {
@@ -45,6 +49,10 @@ data class Occurrence(
     val pickUp: Person?,
     val checklist: List<ChecklistItem>,
     val checkedIds: Set<Long>,
+    /** Ten termin ma własną zmianę (inna osoba lub godzina tylko tego dnia). */
+    val changedThisDay: Boolean = false,
+    /** Ten dzień tygodnia ma w serii własne ustawienia. */
+    val dayRule: pl.sportfamily.app.data.EventDayRule? = null,
 ) {
     val key: String get() = "${event.id}_${date.toEpochDay()}"
     val allDay: Boolean get() = event.allDay
@@ -103,6 +111,13 @@ object Planner {
         val itemsByEvent = data.checklist.groupBy { it.eventId }
         val checksByDay = data.checks.groupBy({ it.day }, { it.itemId })
         val off = data.daysOff(from, to)
+        val rulesByEvent = data.dayRules.groupBy { it.eventId }.mapValues { (_, l) -> l.associateBy { it.weekday } }
+        val overrides = data.overrides.associateBy { it.eventId to it.day }
+        // Pierwsza ustawiona wartość wygrywa: zmiana terminu, potem dzień tygodnia, potem seria. NOBODY = nikt.
+        fun person(vararg ids: Long?): Person? {
+            val id = ids.firstOrNull { it != null } ?: return null
+            return if (id == pl.sportfamily.app.data.NOBODY) null else personById[id]
+        }
 
         return data.events.flatMap { e ->
             val lessons = e.category == Category.SCHOOL && (e.schoolKind == null || e.schoolKind == SchoolKind.LESSONS)
@@ -110,15 +125,19 @@ object Planner {
                 // W dni wolne od szkoły nie ma lekcji. Sprawdziany, prace domowe i treningi zostają.
                 .filter { !(lessons && e.repeatDays != 0 && it in off) }
                 .map { date ->
+                val rule = if (e.repeatDays != 0) rulesByEvent[e.id]?.get(date.dayOfWeek.value) else null
+                val ov = overrides[e.id to date.toEpochDay()]
+                val sMin = ov?.startMinute ?: rule?.startMinute ?: e.startMinute
+                val eMin = ov?.endMinute ?: rule?.endMinute ?: e.endMinute
                 val start: LocalDateTime
                 val end: LocalDateTime
                 if (e.allDay) {
                     start = date.atStartOfDay()
                     end = date.plusDays(e.endDay - e.startDay).atTime(LocalTime.MAX)
                 } else {
-                    start = date.atTime(minuteToTime(e.startMinute))
+                    start = date.atTime(minuteToTime(sMin))
                     val endDate = date.plusDays(e.endDay - e.startDay)
-                    val rawEnd = endDate.atTime(minuteToTime(e.endMinute))
+                    val rawEnd = endDate.atTime(minuteToTime(eMin))
                     end = if (rawEnd.isAfter(start)) rawEnd else start.plusHours(1)
                 }
                 Occurrence(
@@ -128,10 +147,12 @@ object Planner {
                     end = end,
                     children = childrenByEvent[e.id].orEmpty().mapNotNull { childById[it] }
                         .sortedBy { it.sortOrder },
-                    dropOff = e.dropOffPersonId?.let { personById[it] },
-                    pickUp = e.pickUpPersonId?.let { personById[it] },
+                    dropOff = person(ov?.dropOffPersonId, rule?.dropOffPersonId, e.dropOffPersonId),
+                    pickUp = person(ov?.pickUpPersonId, rule?.pickUpPersonId, e.pickUpPersonId),
                     checklist = itemsByEvent[e.id].orEmpty(),
                     checkedIds = checksByDay[date.toEpochDay()].orEmpty().toSet(),
+                    changedThisDay = ov != null,
+                    dayRule = rule,
                 )
             }
         }.sortedWith(compareBy<Occurrence>({ !it.allDay }, { it.start }, { it.event.title }))

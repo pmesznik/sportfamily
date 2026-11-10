@@ -248,6 +248,7 @@ private fun App(vm: MainViewModel = viewModel()) {
                     onToggleCheck = { item, dd -> vm.toggleCheck(item, dd) },
                     onCancelOccurrence = { vm.cancelOccurrence(id, day); nav.popBackStack() },
                     onDelete = { vm.deleteEvent(id); nav.popBackStack() },
+                    onSetOverride = { d, p -> vm.setOverride(id, day, d, p) },
                 )
             }
             composable(
@@ -262,7 +263,7 @@ private fun App(vm: MainViewModel = viewModel()) {
                 EditEventScreen(
                     data = d, eventId = id, initialDay = day,
                     load = vm::loadEvent,
-                    onSave = { e, kids, list -> vm.saveEvent(e, kids, list); nav.popBackStack() },
+                    onSave = { e, kids, list, rules -> vm.saveEvent(e, kids, list, rules); nav.popBackStack() },
                     onClose = { nav.popBackStack() },
                 )
             }

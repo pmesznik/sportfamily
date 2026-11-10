@@ -107,6 +107,35 @@ interface PlannerDao {
     @Upsert suspend fun upsertSchoolDayOff(d: SchoolDayOff)
     @Delete suspend fun deleteSchoolDayOff(d: SchoolDayOff)
 
+    // Ustawienia dni tygodnia i zmiany terminów
+    @Query("SELECT * FROM event_day_rules")
+    fun observeDayRules(): Flow<List<EventDayRule>>
+
+    @Query("SELECT * FROM occurrence_overrides")
+    fun observeOverrides(): Flow<List<OccurrenceOverride>>
+
+    @Query("SELECT * FROM event_day_rules WHERE eventId = :eventId")
+    suspend fun getDayRules(eventId: Long): List<EventDayRule>
+
+    @Query("DELETE FROM event_day_rules WHERE eventId = :eventId")
+    suspend fun clearDayRules(eventId: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDayRules(rules: List<EventDayRule>)
+
+    @Upsert suspend fun upsertOverride(o: OccurrenceOverride)
+
+    @Query("DELETE FROM occurrence_overrides WHERE eventId = :eventId AND day = :day")
+    suspend fun deleteOverride(eventId: Long, day: Long)
+
+    @Transaction
+    suspend fun saveEventWithRules(event: EventEntity, childIds: List<Long>, checklist: List<ChecklistItem>, rules: List<EventDayRule>): Long {
+        val id = saveEvent(event, childIds, checklist)
+        clearDayRules(id)
+        if (event.repeatDays != 0) insertDayRules(rules.map { it.copy(eventId = id) })
+        return id
+    }
+
     // Zadania
     @Upsert suspend fun upsertTask(task: TaskEntity): Long
     @Delete suspend fun deleteTask(task: TaskEntity)

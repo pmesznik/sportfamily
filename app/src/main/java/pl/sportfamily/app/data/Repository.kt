@@ -20,7 +20,8 @@ class Repository(private val dao: PlannerDao) {
                 customDaysOff = off.map { d -> pl.sportfamily.app.domain.CustomDayOff(LocalDate.ofEpochDay(d.day), d.label) },
             )
         },
-    ) { a, b -> a.copy(exceptions = b.exceptions, checklist = b.checklist, checks = b.checks, tasks = b.tasks, customDaysOff = b.customDaysOff) }
+        combine(dao.observeDayRules(), dao.observeOverrides()) { r, o -> r to o },
+    ) { a, b, ro -> a.copy(exceptions = b.exceptions, checklist = b.checklist, checks = b.checks, tasks = b.tasks, customDaysOff = b.customDaysOff, dayRules = ro.first, overrides = ro.second) }
 
     suspend fun ensureDefaults() {
         if (dao.personCount() == 0) {
@@ -38,8 +39,12 @@ class Repository(private val dao: PlannerDao) {
     suspend fun getEventChildIds(id: Long) = dao.getEventChildIds(id)
     suspend fun getChecklist(id: Long) = dao.getChecklist(id)
 
-    suspend fun saveEvent(event: EventEntity, childIds: List<Long>, checklist: List<ChecklistItem>) =
-        dao.saveEvent(event, childIds, checklist)
+    suspend fun saveEvent(event: EventEntity, childIds: List<Long>, checklist: List<ChecklistItem>, rules: List<EventDayRule> = emptyList()) =
+        dao.saveEventWithRules(event, childIds, checklist, rules)
+
+    suspend fun getDayRules(eventId: Long) = dao.getDayRules(eventId)
+    suspend fun setOverride(o: OccurrenceOverride) = dao.upsertOverride(o)
+    suspend fun clearOverride(eventId: Long, day: LocalDate) = dao.deleteOverride(eventId, day.toEpochDay())
 
     suspend fun deleteEvent(id: Long) = dao.deleteEvent(id)
     suspend fun cancelOccurrence(eventId: Long, day: LocalDate) = dao.insertException(EventException(eventId, day.toEpochDay()))
