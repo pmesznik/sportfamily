@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.DeleteOutline
@@ -134,12 +135,17 @@ fun EventDetailScreen(
                     Detail(Icons.Rounded.Schedule, whenText, occ.departure?.let { "Wyjazd ${it.hm()} (${e.travelMinutes} min dojazdu + ${e.bufferMinutes} min zapasu)" })
                     if (e.repeatDays != 0) {
                         val days = (0..6).filter { e.repeatDays and (1 shl it) != 0 }.joinToString(", ") { WeekdayShort[it] }
-                        Detail(Icons.Rounded.Repeat, "Co tydzień: $days", e.repeatUntilDay?.let { "do ${LocalDate.ofEpochDay(it).shortLabel()}" })
+                        Detail(Icons.Rounded.Repeat, (if (e.repeatEveryWeeks > 1) "Co ${e.repeatEveryWeeks} tygodnie" else "Co tydzień") + ": $days", e.repeatUntilDay?.let { "do ${LocalDate.ofEpochDay(it).shortLabel()}" })
                     }
                     if (e.placeName.isNotBlank() || e.address.isNotBlank()) {
                         Detail(Icons.Rounded.LocationOn, e.placeName.ifBlank { e.address }, e.address.takeIf { e.placeName.isNotBlank() && it.isNotBlank() })
                     }
-                    if (e.notes.isNotBlank()) Detail(Icons.AutoMirrored.Rounded.Notes, e.notes, null)
+                    val lessons = remember(e.notes) { if (e.category == pl.sportfamily.app.data.Category.SCHOOL) pl.sportfamily.app.domain.Lessons.parse(e.notes) else emptyList() }
+                    if (lessons.isNotEmpty()) {
+                        val now = java.time.LocalDateTime.now()
+                        Text("Lekcje (${lessons.size})", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        pl.sportfamily.app.ui.components.LessonList(lessons, if (day == now.toLocalDate()) now.hour * 60 + now.minute else null)
+                    } else if (e.notes.isNotBlank()) Detail(Icons.AutoMirrored.Rounded.Notes, e.notes, null)
                 }
             }
 
@@ -147,8 +153,8 @@ fun EventDetailScreen(
                 SectionHeader("Transport")
                 SfCard(Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        TransportRow("Tam", occ.dropOff?.name, occ.departure?.hm()?.let { "wyjazd $it" })
-                        TransportRow("Powrót", occ.pickUp?.name, "odbiór ${occ.end.hm()}")
+                        TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
+                        TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
                     }
                 }
             }
@@ -226,17 +232,23 @@ private fun Detail(icon: androidx.compose.ui.graphics.vector.ImageVector, title:
 }
 
 @Composable
-private fun TransportRow(label: String, person: String?, sub: String?) {
+private fun TransportRow(label: String, person: pl.sportfamily.app.data.Person?, sub: String?) {
     val sf = Sf.colors
+    val context = androidx.compose.ui.platform.LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconBadge(Icons.Rounded.DirectionsCar, if (person == null) sf.error else sf.brand)
-        Column(Modifier.padding(start = 12.dp)) {
+        Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Text(
-                "$label: " + (person ?: "nikt nie przypisany"),
+                "$label: " + (person?.name ?: "nikt nie przypisany"),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                 color = if (person == null) sf.error.onContainer else MaterialTheme.colorScheme.onSurface,
             )
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (person != null && person.phone.isNotBlank()) {
+            IconButton(onClick = { pl.sportfamily.app.ui.dial(context, person.phone) }) {
+                Icon(androidx.compose.material.icons.Icons.Rounded.Call, "Zadzwoń: ${person.name}", tint = sf.brand.main)
+            }
         }
     }
 }

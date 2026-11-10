@@ -1,5 +1,6 @@
 package pl.sportfamily.app.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -23,6 +24,8 @@ data class Child(
 data class Person(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
+    /** Numer telefonu (opcjonalny, np. wybrany z kontaktów) do szybkiego połączenia. */
+    @ColumnInfo(defaultValue = "") val phone: String = "",
 )
 
 /**
@@ -42,6 +45,8 @@ data class EventEntity(
     val endMinute: Int = 0,
     val repeatDays: Int = 0,
     val repeatUntilDay: Long? = null,
+    /** Co ile tygodni powtarzać (1 = co tydzień, 2 = co dwa tygodnie...). */
+    @ColumnInfo(defaultValue = "1") val repeatEveryWeeks: Int = 1,
     val placeName: String = "",
     val address: String = "",
     val travelMinutes: Int = 0,

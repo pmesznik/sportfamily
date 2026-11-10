@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Call
+import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.BrightnessAuto
 import androidx.compose.material.icons.rounded.DarkMode
@@ -119,7 +121,16 @@ fun MoreScreen(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
                     IconBadge(Icons.Rounded.Person, Sf.colors.brand)
                     TextButton(onClick = { editing = p }, modifier = Modifier.weight(1f)) {
-                        Text(p.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth())
+                        Column(Modifier.fillMaxWidth()) {
+                            Text(p.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                            if (p.phone.isNotBlank()) Text(p.phone, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    if (p.phone.isNotBlank()) {
+                        val ctx = androidx.compose.ui.platform.LocalContext.current
+                        IconButton(onClick = { pl.sportfamily.app.ui.dial(ctx, p.phone) }) {
+                            Icon(androidx.compose.material.icons.Icons.Rounded.Call, "Zadzwoń: ${p.name}", tint = Sf.colors.brand.main)
+                        }
                     }
                     IconButton(onClick = { onDeletePerson(p) }) { Icon(Icons.Rounded.DeleteOutline, "Usuń ${p.name}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
@@ -198,11 +209,56 @@ fun MoreScreen(
     }
     editing?.let { p ->
         var name by remember(p) { mutableStateOf(p.name) }
+        var phone by remember(p) { mutableStateOf(p.phone) }
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        // Wybór jednego numeru z kontaktów. Android udostępnia tylko wybrany wpis, bez dostępu do całej książki.
+        val pickPhone = androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ) { res ->
+            val uri = res.data?.data ?: return@rememberLauncherForActivityResult
+            runCatching {
+                ctx.contentResolver.query(
+                    uri,
+                    arrayOf(android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER),
+                    null, null, null,
+                )?.use { c ->
+                    if (c.moveToFirst()) {
+                        val n = c.getString(0).orEmpty()
+                        val num = c.getString(1).orEmpty()
+                        if (name.isBlank() || p.id == 0L) name = n
+                        phone = num
+                    }
+                }
+            }
+        }
         AlertDialog(
             onDismissRequest = { editing = null },
-            title = { Text(if (p.id == 0L) "Nowa osoba" else "Zmień nazwę") },
-            text = { OutlinedTextField(name, { name = it }, label = { Text("Imię lub rola, np. Babcia") }, singleLine = true) },
-            confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onSavePerson(p.copy(name = name.trim())); editing = null }) { Text("Zapisz") } },
+            title = { Text(if (p.id == 0L) "Nowa osoba" else "Edytuj osobę") },
+            text = {
+                Column {
+                    OutlinedButton(
+                        onClick = {
+                            runCatching {
+                                pickPhone.launch(
+                                    android.content.Intent(android.content.Intent.ACTION_PICK, android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Icon(androidx.compose.material.icons.Icons.Rounded.Contacts, null); Text("  Wybierz z kontaktów") }
+                    OutlinedTextField(name, { name = it }, label = { Text("Imię lub rola, np. Babcia") }, singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp))
+                    OutlinedTextField(phone, { phone = it }, label = { Text("Telefon (opcjonalnie)") }, singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                    Text(
+                        "Aplikacja nie ma dostępu do całej książki telefonicznej. Dostaje tylko kontakt, który wybierzesz.",
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            },
+            confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onSavePerson(p.copy(name = name.trim(), phone = phone.trim())); editing = null }) { Text("Zapisz") } },
             dismissButton = { TextButton(onClick = { editing = null }) { Text("Anuluj") } },
         )
     }

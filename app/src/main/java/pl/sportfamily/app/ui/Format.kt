@@ -53,3 +53,10 @@ fun untilLabel(now: LocalDateTime, t: LocalDateTime): String {
         }
     }
 }
+
+/** Otwiera aplikację telefonu z wpisanym numerem. Nie wymaga uprawnień, użytkownik sam naciska "Zadzwoń". */
+fun dial(context: android.content.Context, phone: String) {
+    runCatching {
+        context.startActivity(android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:" + phone.filter { it.isDigit() || it == '+' })))
+    }
+}

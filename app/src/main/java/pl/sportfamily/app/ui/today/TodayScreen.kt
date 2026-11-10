@@ -417,9 +417,16 @@ private fun TimelineRow(row: TimelineItem, now: LocalDateTime, onClick: () -> Un
                 padding = PaddingValues(0.dp),
                 color = if (past) MaterialTheme.colorScheme.surface.copy(alpha = 0.7f) else MaterialTheme.colorScheme.surface,
             ) {
+                // Blok "Szkoła" pokazujemy jako listę lekcji z wyróżnioną bieżącą.
+                val lessons = remember(o.event.notes) {
+                    if (o.event.category == Category.SCHOOL) pl.sportfamily.app.domain.Lessons.parse(o.event.notes) else emptyList()
+                }
                 Row(Modifier.height(IntrinsicSize.Min)) {
                     Box(Modifier.width(4.dp).fillMaxHeight().background(tone.main.copy(alpha = alpha)))
-                    Row(Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.weight(1f).padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = if (lessons.isEmpty()) Alignment.CenterVertically else Alignment.Top,
+                    ) {
                         Column(Modifier.weight(1f)) {
                             Text(o.event.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha), maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {
@@ -427,6 +434,13 @@ private fun TimelineRow(row: TimelineItem, now: LocalDateTime, onClick: () -> Un
                                 Text(
                                     listOfNotNull(o.event.placeName.takeIf { it.isNotBlank() }, if (o.allDay) null else "do ${o.end.hm()}").joinToString(", "),
                                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            if (lessons.isNotEmpty()) {
+                                pl.sportfamily.app.ui.components.LessonList(
+                                    lessons,
+                                    nowMinute = if (o.date == now.toLocalDate()) now.hour * 60 + now.minute else null,
+                                    modifier = Modifier.padding(top = 8.dp),
                                 )
                             }
                         }

@@ -313,3 +313,53 @@ fun HSpace(w: Dp) = Spacer(Modifier.width(w))
 
 @Composable
 fun VSpace(h: Dp) = Spacer(Modifier.height(h))
+
+/**
+ * Lista lekcji z bloku "Szkoła". Gdy podano [nowMinute] (dzisiejszy dzień), bieżąca lekcja jest wyróżniona,
+ * minione przygaszone, a w przerwie pojawia się wiersz "Przerwa, następna o ...".
+ */
+@Composable
+fun LessonList(lessons: List<pl.sportfamily.app.domain.Lesson>, nowMinute: Int?, modifier: Modifier = Modifier) {
+    val sf = Sf.colors
+    val state = nowMinute?.let { pl.sportfamily.app.domain.Lessons.state(lessons, it) }
+    fun hm(m: Int) = "%d:%02d".format(m / 60, m % 60)
+    Column(modifier) {
+        lessons.forEach { l ->
+            if (state is pl.sportfamily.app.domain.LessonState.Break && state.next == l) {
+                Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.width(26.dp))
+                    Text("Przerwa, następna o ${hm(l.startMinute)}", style = MaterialTheme.typography.labelMedium, color = sf.school.onContainer)
+                }
+            }
+            val current = state is pl.sportfamily.app.domain.LessonState.During && state.lesson == l
+            val past = nowMinute != null && l.endMinute <= nowMinute
+            val textColor = when {
+                current -> sf.school.onContainer
+                past -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                else -> MaterialTheme.colorScheme.onSurface
+            }
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 1.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(if (current) sf.school.container else Color.Transparent)
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("${l.number}.", style = MaterialTheme.typography.labelMedium, color = textColor, modifier = Modifier.width(20.dp))
+                Text(
+                    "${hm(l.startMinute)}-${hm(l.endMinute)}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"), color = textColor,
+                    modifier = Modifier.width(80.dp),
+                )
+                Text(
+                    l.subject, color = textColor, modifier = Modifier.weight(1f).padding(end = 4.dp), maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    style = if (current) MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyMedium,
+                )
+                if (current) ToneChip("TERAZ", sf.school)
+            }
+        }
+    }
+}

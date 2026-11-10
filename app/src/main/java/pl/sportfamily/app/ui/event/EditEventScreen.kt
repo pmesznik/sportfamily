@@ -123,6 +123,7 @@ fun EditEventScreen(
     var start by rememberSaveable { mutableIntStateOf(16 * 60) }
     var end by rememberSaveable { mutableIntStateOf(17 * 60 + 30) }
     var repeatDays by rememberSaveable { mutableIntStateOf(0) }
+    var everyWeeks by rememberSaveable { mutableIntStateOf(1) }
     var repeatUntil by rememberSaveable { mutableStateOf<LocalDate?>(null) }
     var place by rememberSaveable { mutableStateOf("") }
     var address by rememberSaveable { mutableStateOf("") }
@@ -146,7 +147,7 @@ fun EditEventScreen(
                 childIds = src.childIds.toSet()
                 date = LocalDate.ofEpochDay(e.startDay); endDate = LocalDate.ofEpochDay(e.endDay); multiDay = e.endDay > e.startDay
                 allDay = e.allDay; start = e.startMinute; end = e.endMinute
-                repeatDays = e.repeatDays; repeatUntil = e.repeatUntilDay?.let { LocalDate.ofEpochDay(it) }
+                repeatDays = e.repeatDays; everyWeeks = e.repeatEveryWeeks; repeatUntil = e.repeatUntilDay?.let { LocalDate.ofEpochDay(it) }
                 place = e.placeName; address = e.address
                 travel = if (e.travelMinutes > 0) e.travelMinutes.toString() else ""; buffer = e.bufferMinutes.toString()
                 dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; importTag = e.importTag
@@ -172,6 +173,7 @@ fun EditEventScreen(
             startMinute = start,
             endMinute = end,
             repeatDays = repeatDays,
+            repeatEveryWeeks = if (repeatDays != 0) everyWeeks else 1,
             repeatUntilDay = if (repeatDays != 0) repeatUntil?.toEpochDay() else null,
             placeName = place.trim(),
             address = address.trim(),
@@ -277,7 +279,28 @@ fun EditEventScreen(
             }
 
             if (!multiDay) {
-                Label("Powtarzaj co tydzień")
+                SectionHeader("Powtarzanie")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(0 to "Jednorazowo", 1 to "Co tydzień", 2 to "Co 2 tygodnie", 3 to "Co 3 tygodnie", 4 to "Co 4 tygodnie").forEach { (n, label) ->
+                        val sel = if (n == 0) repeatDays == 0 else repeatDays != 0 && everyWeeks == n
+                        FilterChip(
+                            selected = sel,
+                            onClick = {
+                                if (n == 0) repeatDays = 0
+                                else {
+                                    everyWeeks = n
+                                    // Pierwsze włączenie: zaznacz dzień tygodnia z daty wydarzenia.
+                                    if (repeatDays == 0) repeatDays = 1 shl (date.dayOfWeek.value - 1)
+                                }
+                            },
+                            label = { Text(label) },
+                            modifier = Modifier.heightIn(min = 40.dp),
+                        )
+                    }
+                }
+            }
+            if (!multiDay && repeatDays != 0) {
+                Label("W które dni (można kilka, np. wtorek i czwartek)")
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                     WeekdayShort.forEachIndexed { i, d ->
                         val bit = 1 shl i

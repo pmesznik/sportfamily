@@ -82,10 +82,14 @@ object Planner {
         val last = minOf(to.toEpochDay(), e.repeatUntilDay ?: Long.MAX_VALUE)
         if (first > last) return emptyList()
         val out = ArrayList<LocalDate>()
+        // Co N tygodni: liczymy tygodnie od poniedziałku tygodnia, w którym seria się zaczyna.
+        val every = e.repeatEveryWeeks.coerceAtLeast(1)
+        val startMonday = LocalDate.ofEpochDay(e.startDay).let { it.minusDays(it.dayOfWeek.value - 1L) }.toEpochDay()
         var d = first
         while (d <= last) {
             val date = LocalDate.ofEpochDay(d)
-            if (e.repeatDays and dayBit(date.dayOfWeek) != 0 && d !in cancelledDays) out += date
+            val week = Math.floorDiv(d - startMonday, 7L)
+            if (e.repeatDays and dayBit(date.dayOfWeek) != 0 && week % every == 0L && d !in cancelledDays) out += date
             d++
         }
         return out
