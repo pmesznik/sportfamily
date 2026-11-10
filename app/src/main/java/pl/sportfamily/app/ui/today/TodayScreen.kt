@@ -3,7 +3,10 @@ package pl.sportfamily.app.ui.today
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.res.painterResource
+import pl.sportfamily.app.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -110,15 +113,22 @@ fun TodayScreen(
 
     LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = contentPadding.calculateTopPadding() + 8.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp)) {
         item {
-            Column(Modifier.padding(vertical = 8.dp)) {
-                Text(today.longLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(greeting(now.toLocalTime()), style = MaterialTheme.typography.headlineMedium)
+            Row(Modifier.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(today.longLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(greeting(now.toLocalTime()), style = MaterialTheme.typography.headlineMedium)
+                }
+                Image(painterResource(R.drawable.logo_symbol), contentDescription = "SportFamily", modifier = Modifier.size(40.dp))
             }
             VSpace(8.dp)
         }
 
         if (data.children.isEmpty() && data.events.isEmpty()) {
             item {
+                Image(
+                    painterResource(R.drawable.logo_horizontal), contentDescription = "SportFamily",
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(56.dp),
+                )
                 EmptyState(
                     icon = Icons.Rounded.CalendarMonth,
                     title = "Zacznijmy od dzieci",

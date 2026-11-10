@@ -1,0 +1,21 @@
+SportFamily, logo kierunek A (Tor)
+
+Kolory
+  Granat      #141B3D
+  Pomarańcz   #FF6A1F
+  Krem (tło)  #FFF5E8
+
+Pliki
+  svg/symbol-*            sam znak: kolor, na ciemne tło, czarny, biały
+  svg/symbol-maly-*       wersja do 16-32 px (tory bez przerwy)
+  svg/logo-poziome-*      znak z napisem w jednej linii
+  svg/logo-pionowe-*      znak nad napisem
+  svg/ikona-aplikacji-*   kafelek ikony, favicon.svg do przeglądarki
+  png/                    te same wersje jako PNG z przezroczystym tłem
+  android/                warstwy ikony adaptacyjnej 108x108 (foreground, background, monochrome)
+
+Zasady
+  Pole ochronne wokół logo: szerokość jednego toru razy dwa.
+  Poniżej 32 px używaj symbol-maly.
+  Na zdjęciach i kolorowych tłach używaj wersji białej lub czarnej.
+  Napis: Poppins Bold + Regular (licencja OFL), zamieniony na krzywe.

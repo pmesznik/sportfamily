@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -84,6 +85,12 @@ fun MoreScreen(
         SectionHeader("Aktualizacje")
         val (status, check) = pl.sportfamily.app.update.rememberUpdateCheck()
         SfCard(Modifier.fillMaxWidth()) {
+            androidx.compose.foundation.Image(
+                androidx.compose.ui.res.painterResource(pl.sportfamily.app.R.drawable.logo_horizontal),
+                contentDescription = "SportFamily",
+                modifier = Modifier.padding(bottom = 12.dp).size(width = 170.dp, height = 44.dp),
+                alignment = Alignment.CenterStart,
+            )
             Text("Wersja ${pl.sportfamily.app.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.titleMedium)
             Text(
                 status ?: "Aplikacja sama sprawdza nowe wersje przy uruchomieniu.",

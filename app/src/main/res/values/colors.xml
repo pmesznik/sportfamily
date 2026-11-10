@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kolory marki z paczki logo (CZYTAJ.txt) -->
+    <color name="brand_navy">#141B3D</color>
+    <color name="brand_orange">#FF6A1F</color>
+    <color name="brand_cream">#FFF5E8</color>
+</resources>
