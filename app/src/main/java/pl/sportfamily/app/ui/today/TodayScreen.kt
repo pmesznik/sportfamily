@@ -32,6 +32,7 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Checklist
 import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material.icons.rounded.Schedule
@@ -137,6 +138,15 @@ fun TodayScreen(
                 }
             }
             return@LazyColumn
+        }
+
+        // Dziś albo jutro bez lekcji: ważne przy pakowaniu wieczorem.
+        val offToday = data.daysOff(today, today)[today]?.takeIf { today.dayOfWeek.value <= 5 }
+        val tomorrow = today.plusDays(1)
+        val offTomorrow = data.daysOff(tomorrow, tomorrow)[tomorrow]?.takeIf { tomorrow.dayOfWeek.value <= 5 }
+        if (data.events.any { it.category == Category.SCHOOL } && (offToday != null || offTomorrow != null)) item(key = "dayoff") {
+            val text = offToday?.let { "Dziś bez lekcji: $it" } ?: "Jutro bez lekcji: $offTomorrow"
+            ToneChip(text, Sf.colors.school, Icons.Rounded.EventAvailable, Modifier.padding(bottom = 10.dp))
         }
 
         conflicts.take(2).forEach { c -> item(key = "c_${c.kind}_${c.a.key}_${c.b?.key}") { ConflictBanner(c, today) { onOpen(c.a) }; VSpace(8.dp) } }

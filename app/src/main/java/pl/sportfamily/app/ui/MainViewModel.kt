@@ -14,6 +14,8 @@ import pl.sportfamily.app.domain.ParsedPlan
 import pl.sportfamily.app.domain.PlanExport
 import pl.sportfamily.app.domain.PlanImport
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import pl.sportfamily.app.ui.theme.SchoolSettings
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -33,7 +35,7 @@ import java.time.LocalDateTime
 class MainViewModel(app: Application) : AndroidViewModel(app) {
     val repo = (app as SportFamilyApp).repository
 
-    val data: StateFlow<PlannerData?> = repo.data
+    val data: StateFlow<PlannerData?> = combine(repo.data, SchoolSettings.voivodeship) { d, v -> d.copy(voivodeship = v) }
         .map<PlannerData, PlannerData?> { it }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -60,6 +62,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun seedDemo() = viewModelScope.launch { repo.seedDemo() }
 
+    fun addSchoolDayOff(day: LocalDate, label: String) = viewModelScope.launch { repo.addSchoolDayOff(day, label) }
+    fun deleteSchoolDayOff(day: LocalDate) = viewModelScope.launch { repo.deleteSchoolDayOff(day) }
+
     // ---------- Import i eksport planu z Excela ----------
 
     /** Wczytany plan czekający na zatwierdzenie w podglądzie. */
@@ -73,12 +78,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             runCatching {
                 val sheets = ctx.contentResolver.openInputStream(uri)!!.use { Xlsx.read(it) }
                 val parsed = sheets.map { it.name to PlanImport.parse(it.rows) }
-                parsed.maxByOrNull { (_, p) -> p.sections.sumOf { it.items.size } }
+                parsed.maxByOrNull { (_, p) -> p.sections.sumOf { it.items.size } + p.dated.size }
                     ?: error("Plik nie ma żadnego arkusza")
             }
         }
         result.onSuccess { (sheet, plan) ->
-            if (plan.sections.isEmpty()) message.value = plan.warnings.firstOrNull() ?: "W pliku nie ma planu do zaimportowania."
+            if (plan.isEmpty) message.value = plan.warnings.firstOrNull() ?: "W pliku nie ma planu do zaimportowania."
             else importDraft.value = ImportDraft(plan, sheet)
         }.onFailure { message.value = "Nie udało się odczytać pliku: ${it.message ?: "nieznany błąd"}" }
     }
@@ -86,9 +91,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun confirmImport(options: ImportOptions, replace: Boolean) = viewModelScope.launch {
         val plan = importDraft.value?.plan ?: return@launch
         val events = PlanImport.toEvents(plan, options).map { it.event to it.childIds }
-        val n = repo.importPlan(options.childId, replace, events)
+        val off = PlanImport.daysOff(plan, options.from)
+        val n = repo.importPlan(options.childId, replace, events, off)
         importDraft.value = null
-        message.value = "Zaimportowano $n zajęć do kalendarza."
+        message.value = buildString {
+            append("Dodano do kalendarza: $n")
+            if (off.isNotEmpty()) append(", dni bez lekcji: ${off.size}")
+            append(".")
+        }
     }
 
     fun export(uri: Uri) = viewModelScope.launch {

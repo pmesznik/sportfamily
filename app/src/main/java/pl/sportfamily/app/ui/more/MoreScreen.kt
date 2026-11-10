@@ -61,6 +61,8 @@ fun MoreScreen(
     onExport: (android.net.Uri) -> Unit = {},
     onConfirmImport: (pl.sportfamily.app.domain.ImportOptions, Boolean) -> Unit = { _, _ -> },
     onDismissImport: () -> Unit = {},
+    onAddDayOff: (java.time.LocalDate, String) -> Unit = { _, _ -> },
+    onDeleteDayOff: (java.time.LocalDate) -> Unit = {},
 ) {
     val pickFile = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()
@@ -127,6 +129,8 @@ fun MoreScreen(
             "Te osoby wybierasz przy wydarzeniu jako zawożące i odbierające. Aplikacja ostrzeże, gdy ktoś ma dwa kursy naraz albo nikt nie wiezie.",
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, start = 4.dp),
         )
+
+        SchoolDaysSection(data, java.time.LocalDate.now(), onAddDayOff, onDeleteDayOff)
 
         SectionHeader("Plan z Excela")
         SfCard(Modifier.fillMaxWidth()) {

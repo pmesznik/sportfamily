@@ -16,6 +16,7 @@ class SportFamilyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         repository = Repository(AppDatabase.create(this).dao())
+        pl.sportfamily.app.ui.theme.SchoolSettings.load(this)
         appScope.launch { repository.ensureDefaults() }
     }
 }

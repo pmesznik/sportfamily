@@ -229,6 +229,8 @@ private fun App(vm: MainViewModel = viewModel()) {
                     onExport = { vm.message.value = null; vm.export(it) },
                     onConfirmImport = { o, r -> vm.confirmImport(o, r) },
                     onDismissImport = { vm.importDraft.value = null },
+                    onAddDayOff = { d, l -> vm.addSchoolDayOff(d, l) },
+                    onDeleteDayOff = { vm.deleteSchoolDayOff(it) },
                 )
             }
             composable(

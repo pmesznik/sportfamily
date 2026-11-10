@@ -8,6 +8,7 @@ import pl.sportfamily.app.data.EventChild
 import pl.sportfamily.app.data.EventEntity
 import pl.sportfamily.app.data.EventException
 import pl.sportfamily.app.data.Person
+import pl.sportfamily.app.data.SchoolKind
 import pl.sportfamily.app.data.TaskEntity
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -24,7 +25,15 @@ data class PlannerData(
     val checklist: List<ChecklistItem> = emptyList(),
     val checks: List<ChecklistCheck> = emptyList(),
     val tasks: List<TaskEntity> = emptyList(),
-)
+    /** Ręcznie dodane dni wolne od lekcji. */
+    val customDaysOff: List<CustomDayOff> = emptyList(),
+    /** Województwo do terminu ferii; null = ferie nieuwzględniane. */
+    val voivodeship: Voivodeship? = null,
+) {
+    /** Dni bez lekcji w przedziale, z opisem (święta, przerwy, ferie, dni dodane ręcznie). */
+    fun daysOff(from: LocalDate, to: LocalDate): Map<LocalDate, String> =
+        SchoolCalendar.daysOff(from, to, voivodeship, customDaysOff)
+}
 
 data class Occurrence(
     val event: EventEntity,
@@ -89,9 +98,14 @@ object Planner {
         val cancelled = data.exceptions.groupBy({ it.eventId }, { it.day })
         val itemsByEvent = data.checklist.groupBy { it.eventId }
         val checksByDay = data.checks.groupBy({ it.day }, { it.itemId })
+        val off = data.daysOff(from, to)
 
         return data.events.flatMap { e ->
-            datesFor(e, from, to, cancelled[e.id]?.toSet() ?: emptySet()).map { date ->
+            val lessons = e.category == Category.SCHOOL && (e.schoolKind == null || e.schoolKind == SchoolKind.LESSONS)
+            datesFor(e, from, to, cancelled[e.id]?.toSet() ?: emptySet())
+                // W dni wolne od szkoły nie ma lekcji. Sprawdziany, prace domowe i treningi zostają.
+                .filter { !(lessons && e.repeatDays != 0 && it in off) }
+                .map { date ->
                 val start: LocalDateTime
                 val end: LocalDateTime
                 if (e.allDay) {

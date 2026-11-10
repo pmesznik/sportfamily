@@ -41,12 +41,16 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import pl.sportfamily.app.data.Category
 import pl.sportfamily.app.data.Child
+import pl.sportfamily.app.domain.DatedItem
+import pl.sportfamily.app.domain.DatedKind
 import pl.sportfamily.app.domain.ImportOptions
 import pl.sportfamily.app.domain.PlanImport
 import pl.sportfamily.app.ui.ImportDraft
 import pl.sportfamily.app.ui.components.KidDot
 import pl.sportfamily.app.ui.components.SectionHeader
 import pl.sportfamily.app.ui.components.SfCard
+import pl.sportfamily.app.ui.components.ToneChip
+import pl.sportfamily.app.ui.shortLabel
 import pl.sportfamily.app.ui.components.categoryIcon
 import pl.sportfamily.app.ui.components.categoryLabel
 import pl.sportfamily.app.ui.longLabel
@@ -74,6 +78,8 @@ fun ImportPreviewDialog(
 
     val options = childId?.let { ImportOptions(it, cats.toList(), asBlock, today, until) }
     val count = options?.let { PlanImport.toEvents(plan, it).size } ?: 0
+    val offDays = remember(plan, today) { PlanImport.daysOff(plan, today).size }
+    val pastCount = plan.dated.count { it.to.isBefore(today) }
 
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -141,14 +147,41 @@ fun ImportPreviewDialog(
                         }
                     }
 
+                    if (plan.dated.isNotEmpty()) {
+                        val offs = plan.dated.filter { it.kind == DatedKind.DAY_OFF }
+                        val events = plan.dated.filter { it.kind != DatedKind.DAY_OFF }
+                        if (offs.isNotEmpty()) {
+                            SectionHeader("Dni bez lekcji")
+                            SfCard(Modifier.fillMaxWidth()) {
+                                offs.forEach { DatedRow(it, today) }
+                                Text(
+                                    "Trafią do listy dni wolnych szkoły (Więcej). Lekcje w te dni znikną z planu wszystkich dzieci.",
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 6.dp),
+                                )
+                            }
+                        }
+                        if (events.isNotEmpty()) {
+                            SectionHeader("Wydarzenia ze szkoły")
+                            SfCard(Modifier.fillMaxWidth()) { events.forEach { DatedRow(it, today) } }
+                        }
+                        if (pastCount > 0) {
+                            Text(
+                                "Minione wpisy ($pastCount) zostaną pominięte.",
+                                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+
                     SectionHeader("Ustawienia")
                     SfCard(Modifier.fillMaxWidth()) {
                         if (cats.any { it == Category.SCHOOL }) {
                             SwitchLine("Lekcje jako jeden blok \"Szkoła\" dziennie", "Lista przedmiotów będzie w szczegółach bloku.", asBlock) { asBlock = it }
                         }
                         SwitchLine("Zastąp wcześniej zaimportowany plan", "Usuwa zajęcia z poprzedniego importu dla tego dziecka. Dodane ręcznie zostają.", replace) { replace = it }
-                        Text(
-                            "Od dziś do " + (until?.let { "${it.longLabel()} ${it.year} (koniec roku szkolnego)" } ?: "odwołania"),
+                        if (plan.sections.isNotEmpty()) Text(
+                            "Od dziś do " + (until?.let { "${it.longLabel().lowercase()} ${it.year} (koniec roku szkolnego)" } ?: "odwołania"),
                             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 8.dp),
                         )
@@ -167,11 +200,46 @@ fun ImportPreviewDialog(
                 }
                 Button(
                     onClick = { options?.let { onConfirm(it, replace) } },
-                    enabled = options != null && count > 0,
+                    enabled = options != null && (count > 0 || offDays > 0),
                     modifier = Modifier.fillMaxWidth().padding(16.dp).heightIn(min = 52.dp),
                     shape = RoundedCornerShape(14.dp),
-                ) { Text(if (options == null) "Wybierz dziecko" else "Dodaj do kalendarza ($count)") }
+                ) {
+                    Text(
+                        when {
+                            options == null -> "Wybierz dziecko"
+                            offDays > 0 && count > 0 -> "Dodaj: $count do kalendarza, $offDays dni wolnych"
+                            offDays > 0 -> "Dodaj $offDays dni wolnych"
+                            else -> "Dodaj do kalendarza ($count)"
+                        }
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun DatedRow(d: DatedItem, today: LocalDate) {
+    val past = d.to.isBefore(today)
+    val tone = when (d.kind) {
+        DatedKind.DAY_OFF -> Sf.colors.school
+        DatedKind.MEETING -> Sf.colors.important
+        DatedKind.FAMILY -> Sf.colors.family
+        DatedKind.GRADES -> Sf.colors.extra
+        DatedKind.EVENT -> Sf.colors.sport
+    }
+    val dates = if (d.from == d.to) d.from.shortLabel() else "${d.from.shortLabel()} do ${d.to.shortLabel()}"
+    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), verticalAlignment = Alignment.Top) {
+        Column(Modifier.width(112.dp)) {
+            Text(dates, style = MaterialTheme.typography.labelMedium,
+                color = if (past) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface)
+            d.startMinute?.let { Text(PlanImport.hm(it) + (d.endMinute?.let { e -> "-" + PlanImport.hm(e) } ?: ""), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        }
+        Column(Modifier.weight(1f)) {
+            Text(d.title, style = MaterialTheme.typography.bodyMedium,
+                color = if (past) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                textDecoration = if (past) androidx.compose.ui.text.style.TextDecoration.LineThrough else null)
+            if (d.kind != DatedKind.DAY_OFF) ToneChip(d.kind.label, tone, modifier = Modifier.padding(top = 3.dp))
         }
     }
 }

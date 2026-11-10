@@ -105,3 +105,10 @@ data class TaskEntity(
     val childId: Long? = null,
     val done: Boolean = false,
 )
+
+/** Dzień wolny od lekcji dodany ręcznie (np. dzień dyrektorski). Święta, przerwy i ferie liczy SchoolCalendar. */
+@Entity(tableName = "school_days_off")
+data class SchoolDayOff(
+    @PrimaryKey val day: Long,
+    val label: String,
+)

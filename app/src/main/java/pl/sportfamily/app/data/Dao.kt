@@ -91,12 +91,21 @@ interface PlannerDao {
     @Query("DELETE FROM events WHERE importTag = :tag AND id IN (SELECT eventId FROM event_children WHERE childId = :childId)")
     suspend fun deleteImported(tag: String, childId: Long): Int
 
+    /** Zapisuje import. Zastępuje tylko wydarzenia z tym samym znacznikiem (plan lekcji albo kalendarium). */
     @Transaction
-    suspend fun importEvents(tag: String, childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>): Int {
-        if (replace) deleteImported(tag, childId)
+    suspend fun importEvents(childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>, daysOff: List<SchoolDayOff>): Int {
+        if (replace) events.mapNotNull { it.first.importTag }.toSet().forEach { deleteImported(it, childId) }
         events.forEach { (e, kids) -> saveEvent(e, kids, emptyList()) }
+        daysOff.forEach { upsertSchoolDayOff(it) }
         return events.size
     }
+
+    // Dni wolne od lekcji (ręczne)
+    @Query("SELECT * FROM school_days_off ORDER BY day")
+    fun observeSchoolDaysOff(): Flow<List<SchoolDayOff>>
+
+    @Upsert suspend fun upsertSchoolDayOff(d: SchoolDayOff)
+    @Delete suspend fun deleteSchoolDayOff(d: SchoolDayOff)
 
     // Zadania
     @Upsert suspend fun upsertTask(task: TaskEntity): Long

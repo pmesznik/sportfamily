@@ -14,12 +14,27 @@ data class PlanItem(val day: DayOfWeek, val startMinute: Int, val endMinute: Int
 /** Sekcja planu, np. "Lekcje" albo "Treningi". [rowTimes] = godziny w osobnej kolumnie (typowe dla lekcji). */
 data class PlanSection(val label: String, val category: Category, val items: List<PlanItem>, val rowTimes: Boolean)
 
+/** Rodzaj wpisu z listy dat (np. kalendarium szkoły). */
+enum class DatedKind(val label: String) {
+    EVENT("Wydarzenie"), DAY_OFF("Dzień wolny"), GRADES("Oceny i egzaminy"), MEETING("Zebranie"), FAMILY("Rodzina")
+}
+
+/** Wpis z konkretną datą: wydarzenie albo dni wolne. Godziny opcjonalne. */
+data class DatedItem(
+    val from: LocalDate, val to: LocalDate,
+    val startMinute: Int?, val endMinute: Int?,
+    val title: String, val kind: DatedKind,
+)
+
 data class ParsedPlan(
     val title: String,
     val sections: List<PlanSection>,
     val warnings: List<String>,
     val schoolYearEnd: LocalDate?,
-)
+    val dated: List<DatedItem> = emptyList(),
+) {
+    val isEmpty: Boolean get() = sections.isEmpty() && dated.isEmpty()
+}
 
 /** Ustawienia importu wybrane w podglądzie. */
 data class ImportOptions(
@@ -36,6 +51,7 @@ data class ImportOptions(
  */
 object PlanImport {
     const val IMPORT_TAG = "xlsx-plan"
+    const val EVENTS_TAG = "xlsx-events"
     private val timeRange = Regex("""(\d{1,2})[:.](\d{2})\s*[-–—]+\s*(\d{1,2})[:.](\d{2})""")
     private val schoolYear = Regex("""(20\d{2})\s*/\s*(20\d{2})""")
 
@@ -85,6 +101,17 @@ object PlanImport {
     }
 
     fun parse(rows: List<List<String>>): ParsedPlan {
+        val grid = parseGrid(rows)
+        val list = parseList(rows, grid.schoolYearEnd)
+        val firstText = rows.firstOrNull { r -> r.any { it.isNotBlank() } }?.firstOrNull { it.isNotBlank() }
+        return if (list == null) grid else grid.copy(
+            title = if (grid.sections.isEmpty()) firstText ?: grid.title else grid.title,
+            dated = list.first,
+            warnings = (if (grid.sections.isEmpty()) emptyList() else grid.warnings) + list.second,
+        )
+    }
+
+    private fun parseGrid(rows: List<List<String>>): ParsedPlan {
         val warnings = ArrayList<String>()
         // Wiersz nagłówka: co najmniej 3 komórki z nazwą dnia.
         val headers = rows.indices.filter { r -> rows[r].count { dayOf(it) != null } >= 3 }
@@ -129,6 +156,87 @@ object PlanImport {
         return ParsedPlan(title, sections, warnings, yearEnd)
     }
 
+    // ---------- Lista dat (kalendarium) ----------
+
+    private val dateFull = Regex("""^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$""")
+    private val dateIso = Regex("""^(\d{4})-(\d{1,2})-(\d{1,2})$""")
+    private val dateShort = Regex("""^(\d{1,2})[.\-/](\d{1,2})\.?$""")
+    private val singleTime = Regex("""(\d{1,2})[:.](\d{2})""")
+
+    /** Data z komórki: 24.06.2027, 2027-06-24, 24.06 (rok z roku szkolnego) albo liczba dni Excela. */
+    fun parseDate(cell: String, schoolYearEnd: LocalDate?): LocalDate? {
+        val t = cell.trim()
+        return runCatching {
+            dateFull.find(t)?.let { val (d, m, y) = it.destructured; return@runCatching LocalDate.of(y.toInt(), m.toInt(), d.toInt()) }
+            dateIso.find(t)?.let { val (y, m, d) = it.destructured; return@runCatching LocalDate.of(y.toInt(), m.toInt(), d.toInt()) }
+            dateShort.find(t)?.let {
+                val (d, m) = it.destructured
+                val endYear = schoolYearEnd?.year ?: return@runCatching null
+                val month = m.toInt()
+                return@runCatching LocalDate.of(if (month >= 9) endYear - 1 else endYear, month, d.toInt())
+            }
+            t.toIntOrNull()?.takeIf { it in 20000..80000 }?.let { LocalDate.of(1899, 12, 30).plusDays(it.toLong()) }
+        }.getOrNull()
+    }
+
+    fun kindOf(rodzaj: String, title: String): DatedKind {
+        val r = norm(rodzaj)
+        val t = norm(title)
+        return when {
+            "woln" in r || "ferie" in r || "przerw" in r -> DatedKind.DAY_OFF
+            "zebran" in r || "konsult" in r -> DatedKind.MEETING
+            "ocen" in r || "egzam" in r -> DatedKind.GRADES
+            "rodzin" in r -> DatedKind.FAMILY
+            r.isNotEmpty() -> DatedKind.EVENT
+            "woln" in t || "ferie" in t || "przerwa" in t || "majowk" in t -> DatedKind.DAY_OFF
+            "zebran" in t || "konsultac" in t || "wywiadow" in t -> DatedKind.MEETING
+            "ocen" in t || "egzamin" in t -> DatedKind.GRADES
+            "rodzin" in t || "piknik" in t -> DatedKind.FAMILY
+            else -> DatedKind.EVENT
+        }
+    }
+
+    /** Tabela z nagłówkiem "Od"/"Data" i "Wydarzenie"/"Nazwa". Null, gdy w arkuszu jej nie ma. */
+    private fun parseList(rows: List<List<String>>, schoolYearEnd: LocalDate?): Pair<List<DatedItem>, List<String>>? {
+        fun isFrom(s: String) = s == "od" || s == "data" || s == "data od" || s == "dzien"
+        fun isTitle(s: String) = s == "wydarzenie" || s == "nazwa" || s == "co"
+        val h = rows.indexOfFirst { row -> val n = row.map { norm(it) }; n.any(::isFrom) && n.any(::isTitle) }
+        if (h < 0) return null
+        val head = rows[h].map { norm(it) }
+        val cFrom = head.indexOfFirst(::isFrom)
+        val cTo = head.indexOfFirst { it == "do" || it == "data do" }
+        val cTime = head.indexOfFirst { it.startsWith("godz") }
+        val cTitle = head.indexOfFirst(::isTitle)
+        val cKind = head.indexOfFirst { it == "rodzaj" || it == "typ" || it == "kategoria" }
+        val items = ArrayList<DatedItem>()
+        val warnings = ArrayList<String>()
+        for (r in h + 1 until rows.size) {
+            val row = rows[r]
+            fun cell(c: Int) = if (c >= 0) row.getOrNull(c)?.trim().orEmpty() else ""
+            val title = cell(cTitle).lines().joinToString(" ") { it.trim() }.trim()
+            // Wiersz bez nazwy wydarzenia (np. przypis pod tabelą) pomijamy bez ostrzeżenia.
+            if (title.isEmpty()) continue
+            val from = parseDate(cell(cFrom), schoolYearEnd)
+            if (from == null) {
+                warnings += "Pominięto \"$title\": brak daty."
+                continue
+            }
+            val to = parseDate(cell(cTo), schoolYearEnd)?.takeIf { !it.isBefore(from) } ?: from
+            val timeText = cell(cTime)
+            val tr = range(timeText)
+            val start = tr?.first ?: singleTime.find(timeText)?.let { it.groupValues[1].toInt() * 60 + it.groupValues[2].toInt() }
+            items += DatedItem(from, to, start, tr?.second, title, kindOf(cell(cKind), title))
+        }
+        return items to warnings
+    }
+
+    /** Dni wolne z listy dat (każdy dzień zakresu osobno), od [from] wzwyż. */
+    fun daysOff(plan: ParsedPlan, from: LocalDate): List<CustomDayOff> =
+        plan.dated.filter { it.kind == DatedKind.DAY_OFF && !it.to.isBefore(from) }.flatMap { d ->
+            (0..(d.to.toEpochDay() - d.from.toEpochDay())).map { d.from.plusDays(it) }
+                .filter { !it.isBefore(from) && it.dayOfWeek.value <= 5 }.map { CustomDayOff(it, d.title) }
+        }
+
     /** Polski rok szkolny kończy się w ostatni piątek czerwca. */
     fun lastFridayOfJune(year: Int): LocalDate =
         LocalDate.of(year, 6, 30).with(TemporalAdjusters.previousOrSame(DayOfWeek.FRIDAY))
@@ -158,6 +266,26 @@ object PlanImport {
                     out += NewEvent(base(k.first, k.second, k.third, days), listOf(o.childId))
                 }
             }
+        }
+        plan.dated.filter { it.kind != DatedKind.DAY_OFF && !it.to.isBefore(o.from) }.forEach { d ->
+            val (cat, kind) = when (d.kind) {
+                DatedKind.MEETING -> Category.IMPORTANT to null
+                DatedKind.FAMILY -> Category.FAMILY to null
+                DatedKind.GRADES -> Category.SCHOOL to (if ("egzamin" in norm(d.title) || "sprawdzian" in norm(d.title)) SchoolKind.TEST else SchoolKind.SCHOOL_EVENT)
+                else -> Category.SCHOOL to SchoolKind.SCHOOL_EVENT
+            }
+            val timed = d.startMinute != null
+            out += NewEvent(
+                EventEntity(
+                    title = d.title, category = cat, schoolKind = kind,
+                    startDay = d.from.toEpochDay(), endDay = d.to.toEpochDay(),
+                    allDay = !timed,
+                    startMinute = d.startMinute ?: 0,
+                    endMinute = d.endMinute ?: ((d.startMinute ?: 0) + 90).coerceAtMost(23 * 60 + 59),
+                    importTag = EVENTS_TAG,
+                ),
+                listOf(o.childId),
+            )
         }
         return out
     }

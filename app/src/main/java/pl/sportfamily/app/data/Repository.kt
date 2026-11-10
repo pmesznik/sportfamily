@@ -14,10 +14,13 @@ class Repository(private val dao: PlannerDao) {
         combine(dao.observeChildren(), dao.observePersons(), dao.observeEvents(), dao.observeEventChildren()) { c, p, e, ec ->
             PlannerData(children = c, persons = p, events = e, eventChildren = ec)
         },
-        combine(dao.observeExceptions(), dao.observeChecklistItems(), dao.observeChecks(), dao.observeTasks()) { ex, it, ch, t ->
-            PlannerData(exceptions = ex, checklist = it, checks = ch, tasks = t)
+        combine(dao.observeExceptions(), dao.observeChecklistItems(), dao.observeChecks(), dao.observeTasks(), dao.observeSchoolDaysOff()) { ex, it, ch, t, off ->
+            PlannerData(
+                exceptions = ex, checklist = it, checks = ch, tasks = t,
+                customDaysOff = off.map { d -> pl.sportfamily.app.domain.CustomDayOff(LocalDate.ofEpochDay(d.day), d.label) },
+            )
         },
-    ) { a, b -> a.copy(exceptions = b.exceptions, checklist = b.checklist, checks = b.checks, tasks = b.tasks) }
+    ) { a, b -> a.copy(exceptions = b.exceptions, checklist = b.checklist, checks = b.checks, tasks = b.tasks, customDaysOff = b.customDaysOff) }
 
     suspend fun ensureDefaults() {
         if (dao.personCount() == 0) {
@@ -42,8 +45,11 @@ class Repository(private val dao: PlannerDao) {
     suspend fun cancelOccurrence(eventId: Long, day: LocalDate) = dao.insertException(EventException(eventId, day.toEpochDay()))
     suspend fun toggleCheck(itemId: Long, day: LocalDate) = dao.toggleCheck(itemId, day.toEpochDay())
 
-    suspend fun importPlan(childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>) =
-        dao.importEvents(pl.sportfamily.app.domain.PlanImport.IMPORT_TAG, childId, replace, events)
+    suspend fun importPlan(childId: Long, replace: Boolean, events: List<Pair<EventEntity, List<Long>>>, daysOff: List<pl.sportfamily.app.domain.CustomDayOff>) =
+        dao.importEvents(childId, replace, events, daysOff.map { SchoolDayOff(it.day.toEpochDay(), it.label) })
+
+    suspend fun addSchoolDayOff(day: LocalDate, label: String) = dao.upsertSchoolDayOff(SchoolDayOff(day.toEpochDay(), label))
+    suspend fun deleteSchoolDayOff(day: LocalDate) = dao.deleteSchoolDayOff(SchoolDayOff(day.toEpochDay(), ""))
 
     suspend fun saveTask(task: TaskEntity) = dao.upsertTask(task)
     suspend fun deleteTask(task: TaskEntity) = dao.deleteTask(task)

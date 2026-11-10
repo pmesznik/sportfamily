@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DirectionsCar
+import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -102,6 +103,7 @@ fun CalendarScreen(
     }
     val conflicts = remember(visible) { Planner.conflicts(visible) }
     val conflictKeys = remember(conflicts) { conflicts.flatMap { listOfNotNull(it.a.key, it.b?.key) }.toSet() }
+    val daysOff = remember(data, rangeFrom, rangeTo) { data.daysOff(rangeFrom, rangeTo) }
 
     LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = contentPadding.calculateTopPadding() + 8.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp)) {
         item {
@@ -158,7 +160,8 @@ fun CalendarScreen(
             val days = (0..6).map { monday.plusDays(it.toLong()) }
             days.forEach { day ->
                 val dayOcc = visible.filter { it.overlapsDay(day) }
-                if (dayOcc.isEmpty()) return@forEach
+                val offLabel = daysOff[day]?.takeIf { day.dayOfWeek.value <= 5 }
+                if (dayOcc.isEmpty() && offLabel == null) return@forEach
                 item(key = "h$day") {
                     val hasConflict = dayOcc.any { it.key in conflictKeys }
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)) {
@@ -169,6 +172,9 @@ fun CalendarScreen(
                         )
                         if (hasConflict) ToneChip("Konflikt", Sf.colors.error, Icons.Rounded.Warning, Modifier.padding(start = 8.dp))
                     }
+                    if (offLabel != null) {
+                        ToneChip("Bez lekcji: $offLabel", Sf.colors.school, Icons.Rounded.EventAvailable, Modifier.padding(bottom = 8.dp))
+                    }
                 }
                 dayOcc.forEach { o ->
                     item(key = "o${o.key}_$day") { AgendaCard(o, day, o.key in conflictKeys, onClick = { onOpen(o) }) }
@@ -178,7 +184,7 @@ fun CalendarScreen(
                 Text("W tym tygodniu nic nie zaplanowano.", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 24.dp))
             }
         } else {
-            item { MonthGrid(selected, today, visible, onSelect = { onSelect(it); mode = 0 }) }
+            item { MonthGrid(selected, today, visible, daysOff, onSelect = { onSelect(it); mode = 0 }) }
         }
     }
 }
@@ -270,7 +276,7 @@ fun AgendaCard(o: Occurrence, day: LocalDate, conflict: Boolean, onClick: () -> 
 }
 
 @Composable
-private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrence>, onSelect: (LocalDate) -> Unit) {
+private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrence>, daysOff: Map<LocalDate, String>, onSelect: (LocalDate) -> Unit) {
     val sf = Sf.colors
     val first = selected.withDayOfMonth(1)
     val start = first.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
@@ -292,7 +298,13 @@ private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrenc
                             .aspectRatio(0.82f)
                             .padding(2.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if (d == today) sf.brand.container else Color.Transparent)
+                            .background(
+                                when {
+                                    d == today -> sf.brand.container
+                                    d in daysOff && d.dayOfWeek.value <= 5 && inMonth -> sf.school.container
+                                    else -> Color.Transparent
+                                }
+                            )
                             .clickable { onSelect(d) }
                             .padding(top = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -318,7 +330,7 @@ private fun MonthGrid(selected: LocalDate, today: LocalDate, occ: List<Occurrenc
         }
     }
     Text(
-        "Dotknij dnia, żeby zobaczyć jego tydzień. Paski to kolory kategorii, zwykłe lekcje są ukryte.",
+        "Dotknij dnia, żeby zobaczyć jego tydzień. Paski to kolory kategorii, zwykłe lekcje są ukryte. Zielone tło: dzień bez lekcji.",
         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 10.dp, start = 4.dp),
     )
