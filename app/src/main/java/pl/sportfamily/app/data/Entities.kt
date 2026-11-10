@@ -56,6 +56,9 @@ data class EventEntity(
     val notes: String = "",
     /** Kogo jeszcze zabrać (np. kolega ze szkoły), wolny tekst. */
     @ColumnInfo(defaultValue = "") val alsoTake: String = "",
+    /** Trener (dla treningów): imię i telefon do szybkiego połączenia. */
+    @ColumnInfo(defaultValue = "") val coachName: String = "",
+    @ColumnInfo(defaultValue = "") val coachPhone: String = "",
     /** Znacznik wydarzeń z importu planu (ponowny import zastępuje je zamiast dublować). */
     val importTag: String? = null,
 )

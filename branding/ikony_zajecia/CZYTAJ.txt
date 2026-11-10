@@ -1,0 +1,8 @@
+SportFamily, 95 ikon zajęć i sportów
+
+svg/jasne-tlo       kontur granatowy #141B3D, kropka #FF6A1F
+svg/granatowe-tlo   kontur biały #FFFFFF, kropka #FF6A1F, na tło #141B3D
+png/                te same ikony 96 px, przezroczyste tło
+ikony.json          nazwa, grupa i słowa kluczowe do automatycznego doboru ikony
+
+Siatka 24 px, linia 2 px, zaokrąglone końce. Nazwy plików są takie same w obu wersjach.

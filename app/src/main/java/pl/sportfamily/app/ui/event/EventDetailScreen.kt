@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.event
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -21,6 +24,7 @@ import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.EventBusy
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Navigation
@@ -97,11 +101,11 @@ fun EventDetailScreen(
         topBar = {
             TopAppBar(
                 title = {},
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Wstecz") } },
+                navigationIcon = { IconButton(onClick = onBack) { SfIcon(AppIcons.wstecz, "Wstecz") } },
                 actions = {
                     if (occ != null) {
-                        IconButton(onClick = onEdit) { Icon(Icons.Rounded.Edit, "Edytuj") }
-                        IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Rounded.DeleteOutline, "Usuń") }
+                        IconButton(onClick = onEdit) { SfIcon(AppIcons.edytuj, "Edytuj") }
+                        IconButton(onClick = { confirmDelete = true }) { SfIcon(AppIcons.usun, "Usuń") }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
@@ -135,20 +139,20 @@ fun EventDetailScreen(
                         occ.multiDay -> "${occ.start.toLocalDate().shortLabel()} ${occ.start.hm()} do ${occ.end.toLocalDate().shortLabel()} ${occ.end.hm()}"
                         else -> "${day.longLabel()}, ${occ.start.hm()} do ${occ.end.hm()}"
                     }
-                    Detail(Icons.Rounded.Schedule, whenText, occ.departure?.let { "Wyjazd ${it.hm()} (${e.travelMinutes} min dojazdu + ${e.bufferMinutes} min zapasu)" })
+                    Detail(AppIcons.wyjazd, whenText, occ.departure?.let { "Wyjazd ${it.hm()} (${e.travelMinutes} min dojazdu + ${e.bufferMinutes} min zapasu)" })
                     if (e.repeatDays != 0) {
                         val days = (0..6).filter { e.repeatDays and (1 shl it) != 0 }.joinToString(", ") { WeekdayShort[it] }
-                        Detail(Icons.Rounded.Repeat, (if (e.repeatEveryWeeks > 1) "Co ${e.repeatEveryWeeks} tygodnie" else "Co tydzień") + ": $days", e.repeatUntilDay?.let { "do ${LocalDate.ofEpochDay(it).shortLabel()}" })
+                        Detail(AppIcons.powtarzanie, (if (e.repeatEveryWeeks > 1) "Co ${e.repeatEveryWeeks} tygodnie" else "Co tydzień") + ": $days", e.repeatUntilDay?.let { "do ${LocalDate.ofEpochDay(it).shortLabel()}" })
                     }
                     if (e.placeName.isNotBlank() || e.address.isNotBlank()) {
-                        Detail(Icons.Rounded.LocationOn, e.placeName.ifBlank { e.address }, e.address.takeIf { e.placeName.isNotBlank() && it.isNotBlank() })
+                        Detail(AppIcons.miejsce, e.placeName.ifBlank { e.address }, e.address.takeIf { e.placeName.isNotBlank() && it.isNotBlank() })
                     }
                     val lessons = remember(e.notes) { if (e.category == pl.sportfamily.app.data.Category.SCHOOL) pl.sportfamily.app.domain.Lessons.parse(e.notes) else emptyList() }
                     if (lessons.isNotEmpty()) {
                         val now = java.time.LocalDateTime.now()
                         Text("Lekcje (${lessons.size})", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         pl.sportfamily.app.ui.components.LessonList(lessons, if (day == now.toLocalDate()) now.hour * 60 + now.minute else null)
-                    } else if (e.notes.isNotBlank()) Detail(Icons.AutoMirrored.Rounded.Notes, e.notes, null)
+                    } else if (e.notes.isNotBlank()) Detail(AppIcons.notatki, e.notes, null)
                 }
             }
 
@@ -157,14 +161,34 @@ fun EventDetailScreen(
                 SectionHeader("Transport")
                 SfCard(Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        if (occ.changedThisDay) ToneChip("Zmiana tylko na ten dzień", sf.important, Icons.Rounded.Edit)
-                        TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
-                        TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
-                        if (occ.alsoTake.isNotBlank()) Detail(Icons.Rounded.Edit, "Zabierz też: ${occ.alsoTake}", null)
+                        if (occ.changedThisDay) ToneChip("Zmiana tylko na ten dzień", sf.important, AppIcons.zmianaTerminu)
+                        if (occ.stayFrom != null || occ.stayFor != null) {
+                            Detail(AppIcons.wyjazd, "To samo miejsce: ${occ.event.placeName}",
+                                listOfNotNull(occ.stayFrom?.let { "Dziecko jest już na miejscu po: $it, bez dojazdu" }, occ.stayFor?.let { "Zostaje na miejscu na: $it, bez odbioru" }).joinToString(". "))
+                        }
+                        if (occ.stayFrom == null) TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
+                        if (occ.stayFor == null) TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
+                        if (occ.alsoTake.isNotBlank()) Detail(AppIcons.zabierzTez, "Zabierz też: ${occ.alsoTake}", null)
                         if (repeating && data.persons.isNotEmpty()) {
                             OutlinedButton(onClick = { changingDay = true }, shape = RoundedCornerShape(12.dp)) {
                                 Text(if (occ.changedThisDay) "Zmień lub cofnij zmianę na ten dzień" else "Zmień na ten dzień")
                             }
+                        }
+                    }
+                }
+            }
+
+            if (e.coachName.isNotBlank() || e.coachPhone.isNotBlank()) {
+                SectionHeader("Trener")
+                SfCard(Modifier.fillMaxWidth()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconBadge(AppIcons.trener, sf.brand)
+                        Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                            Text(e.coachName.ifBlank { "Trener" }, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
+                            if (e.coachPhone.isNotBlank()) Text(e.coachPhone, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        if (e.coachPhone.isNotBlank()) IconButton(onClick = { pl.sportfamily.app.ui.dial(context, e.coachPhone) }) {
+                            SfIcon(AppIcons.telefon, "Zadzwoń do trenera", tint = sf.brand.main)
                         }
                     }
                 }
@@ -194,13 +218,13 @@ fun EventDetailScreen(
                     Button(
                         onClick = { openNavigation(context, e.address.ifBlank { e.placeName }) },
                         modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp),
-                    ) { Icon(Icons.Rounded.Navigation, null, Modifier.size(20.dp)); Text("  Nawiguj") }
+                    ) { SfIcon(AppIcons.nawigacja, null, Modifier.size(20.dp)); Text("  Nawiguj") }
                 }
                 if (e.repeatDays != 0) {
                     OutlinedButton(
                         onClick = { confirmCancel = true },
                         modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(14.dp),
-                    ) { Icon(Icons.Rounded.EventBusy, null, Modifier.size(20.dp)); Text("  Odwołaj ten") }
+                    ) { SfIcon(AppIcons.odwolane, null, Modifier.size(20.dp)); Text("  Odwołaj ten") }
                 }
             }
         }
@@ -293,7 +317,7 @@ fun EventDetailScreen(
 @Composable
 private fun Detail(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, sub: String?) {
     Row(verticalAlignment = Alignment.Top) {
-        Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+        SfIcon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
         Column(Modifier.padding(start = 12.dp)) {
             Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -306,7 +330,7 @@ private fun TransportRow(label: String, person: pl.sportfamily.app.data.Person?,
     val sf = Sf.colors
     val context = androidx.compose.ui.platform.LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconBadge(Icons.Rounded.DirectionsCar, if (person == null) sf.error else sf.brand)
+        IconBadge(AppIcons.transport, if (person == null) sf.error else sf.brand)
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Text(
                 "$label: " + (person?.name ?: "nikt nie przypisany"),
@@ -317,7 +341,7 @@ private fun TransportRow(label: String, person: pl.sportfamily.app.data.Person?,
         }
         if (person != null && person.phone.isNotBlank()) {
             IconButton(onClick = { pl.sportfamily.app.ui.dial(context, person.phone) }) {
-                Icon(androidx.compose.material.icons.Icons.Rounded.Call, "Zadzwoń: ${person.name}", tint = sf.brand.main)
+                SfIcon(AppIcons.telefon, "Zadzwoń: ${person.name}", tint = sf.brand.main)
             }
         }
     }

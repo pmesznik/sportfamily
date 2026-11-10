@@ -1,0 +1,427 @@
+[
+ {
+  "plik": "szkola-lekcje.svg",
+  "nazwa": "Lekcje",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Blok lekcji w danym dniu (np. Szkoła 8:15-13:50).",
+  "obecnie": "czapka absolwenta",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "szkola-sprawdzian.svg",
+  "nazwa": "Sprawdzian",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Zapowiedziany sprawdzian lub test.",
+  "obecnie": "dymek ze znakiem zapytania",
+  "slowa_kluczowe": [
+   "sprawdzian",
+   "test",
+   "egzamin"
+  ]
+ },
+ {
+  "plik": "szkola-kartkowka.svg",
+  "nazwa": "Kartkówka",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Krótka kartkówka, mniejsza waga niż sprawdzian.",
+  "obecnie": "błyskawica",
+  "slowa_kluczowe": [
+   "kartków"
+  ]
+ },
+ {
+  "plik": "szkola-praca-domowa.svg",
+  "nazwa": "Praca domowa",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Zadanie domowe na konkretny dzień.",
+  "obecnie": "notes z ołówkiem",
+  "slowa_kluczowe": [
+   "praca domow",
+   "zadanie dom"
+  ]
+ },
+ {
+  "plik": "szkola-projekt.svg",
+  "nazwa": "Projekt",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Dłuższy projekt lub prezentacja do oddania.",
+  "obecnie": "kartka z listą",
+  "slowa_kluczowe": [
+   "projekt",
+   "prezentac"
+  ]
+ },
+ {
+  "plik": "szkola-wydarzenie.svg",
+  "nazwa": "Wydarzenie szkolne",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Akademia, apel, dzień otwarty, wycieczka klasowa, strój galowy.",
+  "obecnie": "konfetti",
+  "slowa_kluczowe": [
+   "akademi",
+   "apel",
+   "wycieczk",
+   "galow"
+  ]
+ },
+ {
+  "plik": "szkola-dzien-wolny.svg",
+  "nazwa": "Dzień bez lekcji",
+  "grupa": "Szkoła",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Święto, przerwa świąteczna, ferie, dzień dyrektorski.",
+  "obecnie": "kalendarz z ptaszkiem",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "kat-sport.svg",
+  "nazwa": "Sport",
+  "grupa": "Kategorie",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Kategoria: treningi, mecze, zawody.",
+  "obecnie": "biegnący ludzik",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "kat-szkola.svg",
+  "nazwa": "Szkoła",
+  "grupa": "Kategorie",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Kategoria: lekcje, sprawdziany, prace domowe.",
+  "obecnie": "czapka absolwenta",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "kat-zajecia.svg",
+  "nazwa": "Zajęcia",
+  "grupa": "Kategorie",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Kategoria: zajęcia dodatkowe (muzyka, języki, koła).",
+  "obecnie": "paleta malarska",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "kat-rodzina.svg",
+  "nazwa": "Rodzina",
+  "grupa": "Kategorie",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Kategoria: sprawy rodzinne, wizyty, wyjazdy.",
+  "obecnie": "domek",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "kat-wazne.svg",
+  "nazwa": "Ważne",
+  "grupa": "Kategorie",
+  "priorytet": "1, najważniejsze",
+  "znaczenie": "Kategoria: ważne terminy, turnieje, egzaminy.",
+  "obecnie": "puchar",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "urodziny.svg",
+  "nazwa": "Urodziny",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Urodziny, imieniny, przyjęcie.",
+  "obecnie": "tort (Material)",
+  "slowa_kluczowe": [
+   "urodzin",
+   "imienin",
+   "przyjęci"
+  ]
+ },
+ {
+  "plik": "lekarz.svg",
+  "nazwa": "Lekarz",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Wizyta u lekarza, szczepienie, badania.",
+  "obecnie": "apteczka (Material)",
+  "slowa_kluczowe": [
+   "lekarz",
+   "przychodn",
+   "szczepien",
+   "badani",
+   "pediatr"
+  ]
+ },
+ {
+  "plik": "dentysta.svg",
+  "nazwa": "Dentysta",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Dentysta, ortodonta.",
+  "obecnie": "apteczka (Material)",
+  "slowa_kluczowe": [
+   "dentyst",
+   "ortodont",
+   "stomatolog"
+  ]
+ },
+ {
+  "plik": "turniej.svg",
+  "nazwa": "Turniej",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Turniej, zawody, mistrzostwa, puchar, liga.",
+  "obecnie": "puchar (Material)",
+  "slowa_kluczowe": [
+   "turniej",
+   "zawody",
+   "mistrzost",
+   "puchar",
+   "liga"
+  ]
+ },
+ {
+  "plik": "wyjazd.svg",
+  "nazwa": "Wyjazd",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Obóz, kolonie, wakacje, wyjazd rodzinny.",
+  "obecnie": "brak",
+  "slowa_kluczowe": [
+   "obóz",
+   "kolonie",
+   "wakacj",
+   "wyjazd"
+  ]
+ },
+ {
+  "plik": "zebranie.svg",
+  "nazwa": "Zebranie",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Wywiadówka, zebranie rodziców, konsultacje.",
+  "obecnie": "brak",
+  "slowa_kluczowe": [
+   "zebrani",
+   "wywiadówk",
+   "konsultac"
+  ]
+ },
+ {
+  "plik": "oplata.svg",
+  "nazwa": "Opłata",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Opłata za zajęcia, składka, wpisowe.",
+  "obecnie": "brak",
+  "slowa_kluczowe": [
+   "opłat",
+   "składk",
+   "wpisow"
+  ]
+ },
+ {
+  "plik": "fryzjer.svg",
+  "nazwa": "Fryzjer",
+  "grupa": "Rodzina i ważne",
+  "priorytet": "2",
+  "znaczenie": "Wizyta u fryzjera.",
+  "obecnie": "brak",
+  "slowa_kluczowe": [
+   "fryzjer"
+  ]
+ },
+ {
+  "plik": "ui-transport.svg",
+  "nazwa": "Transport",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Kto zawozi i odbiera dziecko (karty, szczegóły, ostrzeżenia).",
+  "obecnie": "samochód",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-wyjazd.svg",
+  "nazwa": "Godzina wyjazdu",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Kiedy wyjechać, z dojazdem i zapasem.",
+  "obecnie": "zegar",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-miejsce.svg",
+  "nazwa": "Miejsce",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Adres lub nazwa miejsca zajęć.",
+  "obecnie": "pinezka",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-nawigacja.svg",
+  "nazwa": "Nawiguj",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Przycisk otwierający mapę z trasą.",
+  "obecnie": "strzałka nawigacji",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-telefon.svg",
+  "nazwa": "Zadzwoń",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Połączenie z osobą wożącą lub trenerem.",
+  "obecnie": "słuchawka",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-trener.svg",
+  "nazwa": "Trener",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Karta trenera w szczegółach treningu.",
+  "obecnie": "postać",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-zabierz-tez.svg",
+  "nazwa": "Zabierz też",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dodatkowa osoba do zabrania (np. kolega z klasy).",
+  "obecnie": "ołówek (prowizorka)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-lista-rzeczy.svg",
+  "nazwa": "Lista rzeczy",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Co spakować na zajęcia (plecak, odhaczanie).",
+  "obecnie": "plecak, lista",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-zadanie.svg",
+  "nazwa": "Zadanie",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Zadania do zrobienia.",
+  "obecnie": "kółko z ptaszkiem",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-powtarzanie.svg",
+  "nazwa": "Powtarzanie",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Zajęcia cykliczne, np. pn, śr, pt.",
+  "obecnie": "strzałki w kółko",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-odwolane.svg",
+  "nazwa": "Odwołany termin",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Przycisk Odwołaj ten termin.",
+  "obecnie": "kalendarz z krzyżykiem",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-konflikt.svg",
+  "nazwa": "Konflikt",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Ostrzeżenie: brak kierowcy, dwa miejsca naraz.",
+  "obecnie": "trójkąt z wykrzyknikiem",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-przypomnienie.svg",
+  "nazwa": "Przypomnienia",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Ustawienia powiadomień, powiadomienia wyłączone.",
+  "obecnie": "przekreślony dzwonek",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-widzet.svg",
+  "nazwa": "Widżet",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dodaj widżet na ekran główny.",
+  "obecnie": "kwadraty",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-import.svg",
+  "nazwa": "Import z Excela",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Wczytaj plan lekcji z pliku.",
+  "obecnie": "strzałka w górę",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-eksport.svg",
+  "nazwa": "Eksport do Excela",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Zapisz plan do pliku.",
+  "obecnie": "strzałka w dół",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "tab-dzisiaj.svg",
+  "nazwa": "Zakładka Dzisiaj",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dolny pasek: wersja zwykła i wybrana.",
+  "obecnie": "kalendarz z dniem",
+  "slowa_kluczowe": [],
+  "plik_wybrana": "tab-dzisiaj-wybrana.svg"
+ },
+ {
+  "plik": "tab-kalendarz.svg",
+  "nazwa": "Zakładka Kalendarz",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dolny pasek: wersja zwykła i wybrana.",
+  "obecnie": "kalendarz miesiąca",
+  "slowa_kluczowe": [],
+  "plik_wybrana": "tab-kalendarz-wybrana.svg"
+ },
+ {
+  "plik": "tab-dzieci.svg",
+  "nazwa": "Zakładka Dzieci",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dolny pasek: wersja zwykła i wybrana.",
+  "obecnie": "grupa osób",
+  "slowa_kluczowe": [],
+  "plik_wybrana": "tab-dzieci-wybrana.svg"
+ },
+ {
+  "plik": "tab-zadania.svg",
+  "nazwa": "Zakładka Zadania",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dolny pasek: wersja zwykła i wybrana.",
+  "obecnie": "ptaszek w kółku",
+  "slowa_kluczowe": [],
+  "plik_wybrana": "tab-zadania-wybrana.svg"
+ },
+ {
+  "plik": "tab-wiecej.svg",
+  "nazwa": "Zakładka Więcej",
+  "grupa": "Interfejs aplikacji",
+  "priorytet": "3, opcjonalne",
+  "znaczenie": "Dolny pasek.",
+  "obecnie": "trzy kropki",
+  "slowa_kluczowe": []
+ }
+]

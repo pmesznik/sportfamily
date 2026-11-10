@@ -21,5 +21,7 @@ object ThemeSettings {
     fun set(context: Context, mode: ThemeMode) {
         _mode.value = mode
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, mode.name).apply()
+        // Widżet ma ten sam motyw co aplikacja.
+        pl.sportfamily.app.notify.ReminderScheduler.requestRefresh(context)
     }
 }

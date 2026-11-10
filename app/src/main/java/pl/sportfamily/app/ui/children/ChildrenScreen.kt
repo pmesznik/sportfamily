@@ -1,5 +1,9 @@
 package pl.sportfamily.app.ui.children
 
+import pl.sportfamily.app.ui.components.SfIcon
+
+import pl.sportfamily.app.ui.components.AppIcons
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -78,7 +82,7 @@ fun ChildrenScreen(
         item { Text("Dzieci", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 8.dp)) }
         if (data.children.isEmpty()) {
             item {
-                EmptyState(Icons.Rounded.Groups, "Brak dzieci", "Dodaj dziecko i wybierz mu kolor. Ten kolor zobaczysz w kalendarzu, na osi dnia i na widgetach.") {
+                EmptyState(AppIcons.tabDzieci, "Brak dzieci", "Dodaj dziecko i wybierz mu kolor. Ten kolor zobaczysz w kalendarzu, na osi dnia i na widgetach.") {
                     Button(onClick = { editing = Child(name = "", colorArgb = ChildPalette.first()) }) { Text("Dodaj dziecko") }
                 }
             }
@@ -105,7 +109,7 @@ fun ChildrenScreen(
                     Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOfNotNull(nextSport, nextSchool).forEach { o ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(eventIcon(o.event), null, tint = Sf.colors.of(o.event.category).main, modifier = Modifier.size(20.dp))
+                                pl.sportfamily.app.ui.components.EventIcon(o.event, Sf.colors.of(o.event.category).main, Modifier.size(20.dp))
                                 Text(o.event.title, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(start = 10.dp).weight(1f))
                                 ToneChip("${o.date.relativeLabel(today)} ${o.start.hm()}", Sf.colors.neutral)
                             }
@@ -162,7 +166,7 @@ fun ChildDialog(initial: Child, onDismiss: () -> Unit, onSave: (Child) -> Unit, 
                                 .clickable { color = argb }
                                 .semantics { contentDescription = "Kolor ${i + 1}" + if (sel) ", wybrany" else "" },
                             contentAlignment = Alignment.Center,
-                        ) { if (sel) Icon(Icons.Rounded.Check, null, tint = Color.White) }
+                        ) { if (sel) SfIcon(AppIcons.zaznaczone, null, tint = Color.White) }
                     }
                 }
                 if (onDelete != null) {

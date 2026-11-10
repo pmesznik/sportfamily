@@ -3,4 +3,5 @@
     <string name="app_name">SportFamily Kalendarz</string>
     <!-- Podpis pod logo w aplikacji. -->
     <string name="app_tagline">Kalendarz rodzinny</string>
+    <string name="widget_description">Najbliższe zajęcia, godzina wyjazdu i plan dnia</string>
 </resources>

@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.calendar
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,6 +43,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,7 +69,7 @@ import pl.sportfamily.app.ui.components.SfCard
 import pl.sportfamily.app.ui.components.ToneChip
 import pl.sportfamily.app.ui.components.categoryIcon
 import pl.sportfamily.app.ui.components.categoryLabel
-import pl.sportfamily.app.ui.components.eventIcon
+import pl.sportfamily.app.ui.components.EventIcon
 import pl.sportfamily.app.ui.dayMonthLabel
 import pl.sportfamily.app.ui.hm
 import pl.sportfamily.app.ui.longLabel
@@ -75,7 +80,7 @@ import java.time.LocalDate
 import java.time.temporal.IsoFields
 import java.time.temporal.TemporalAdjusters
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun CalendarScreen(
     data: PlannerData,
@@ -105,7 +110,22 @@ fun CalendarScreen(
     val conflictKeys = remember(conflicts) { conflicts.flatMap { listOfNotNull(it.a.key, it.b?.key) }.toSet() }
     val daysOff = remember(data, rangeFrom, rangeTo) { data.daysOff(rangeFrom, rangeTo) }
 
-    LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = contentPadding.calculateTopPadding() + 8.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp)) {
+    // Dni, które mają sekcję na liście: z wydarzeniami, dniem wolnym albo wybrany. Indeksy służą do przewijania po stuknięciu w dzień.
+    val weekDays = (0..6).map { monday.plusDays(it.toLong()) }
+    val shownDays = weekDays.filter { d -> visible.any { it.overlapsDay(d) } || daysOff[d]?.let { d.dayOfWeek.value <= 5 } == true || d == selected }
+    val dayIndex = remember(shownDays, visible) {
+        var idx = 4 // tytuł, przełącznik, filtry, pasek tygodnia
+        shownDays.associateWith { d -> idx.also { idx += 1 + visible.count { it.overlapsDay(d) } } }
+    }
+    val listState = rememberLazyListState()
+    // Przypięty pasek dni nie może chować się pod górnym paskiem aplikacji.
+    val pinned by remember { androidx.compose.runtime.derivedStateOf { listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex == 3 && listState.firstVisibleItemScrollOffset > 0) } }
+    val stripPx = with(androidx.compose.ui.platform.LocalDensity.current) { 84.dp.roundToPx() }
+    LaunchedEffect(selected, mode, dayIndex) {
+        if (mode == 0) dayIndex[selected]?.let { listState.animateScrollToItem(it, scrollOffset = -stripPx) }
+    }
+
+    LazyColumn(state = listState, contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = contentPadding.calculateTopPadding() + 8.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp)) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp)) {
                 Column(Modifier.weight(1f)) {
@@ -118,14 +138,15 @@ fun CalendarScreen(
                         style = MaterialTheme.typography.headlineMedium,
                     )
                 }
-                IconButton(onClick = { onSelect(if (mode == 0) selected.minusWeeks(1) else selected.minusMonths(1)) }) { Icon(Icons.Rounded.ChevronLeft, "Wcześniej") }
-                IconButton(onClick = { onSelect(if (mode == 0) selected.plusWeeks(1) else selected.plusMonths(1)) }) { Icon(Icons.Rounded.ChevronRight, "Później") }
+                IconButton(onClick = { onSelect(if (mode == 0) selected.minusWeeks(1) else selected.minusMonths(1)) }) { SfIcon(AppIcons.poprzedni, "Wcześniej") }
+                IconButton(onClick = { onSelect(if (mode == 0) selected.plusWeeks(1) else selected.plusMonths(1)) }) { SfIcon(AppIcons.nastepny, "Później") }
             }
         }
         item {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
                 listOf("Tydzień", "Miesiąc").forEachIndexed { i, label ->
-                    SegmentedButton(selected = mode == i, onClick = { mode = i }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(label) }
+                    SegmentedButton(selected = mode == i, onClick = { mode = i }, shape = SegmentedButtonDefaults.itemShape(i, 2),
+                        icon = { SegmentedButtonDefaults.Icon(active = mode == i, activeContent = { SfIcon(AppIcons.zaznaczone, null, Modifier.size(SegmentedButtonDefaults.IconSize)) }) }) { Text(label) }
                 }
             }
         }
@@ -147,7 +168,7 @@ fun CalendarScreen(
                         selected = on,
                         onClick = { hiddenCats = if (on) hiddenCats + cat.name else hiddenCats - cat.name },
                         label = { Text(categoryLabel(cat)) },
-                        leadingIcon = { Icon(categoryIcon(cat), null, tint = Sf.colors.of(cat).main, modifier = Modifier.size(18.dp)) },
+                        leadingIcon = { SfIcon(categoryIcon(cat), null, tint = Sf.colors.of(cat).main, modifier = Modifier.size(18.dp)) },
                         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant),
                         modifier = Modifier.heightIn(min = 40.dp),
                     )
@@ -156,12 +177,11 @@ fun CalendarScreen(
         }
 
         if (mode == 0) {
-            item { WeekStrip(monday, selected, today, visible, conflictKeys, onSelect) }
-            val days = (0..6).map { monday.plusDays(it.toLong()) }
-            days.forEach { day ->
+            // Pasek dni zostaje na górze przy przewijaniu, żeby zawsze dało się stuknąć inny dzień.
+            stickyHeader { Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(top = if (pinned) contentPadding.calculateTopPadding() else 0.dp, bottom = 6.dp)) { WeekStrip(monday, selected, today, visible, conflictKeys, onSelect) } }
+            shownDays.forEach { day ->
                 val dayOcc = visible.filter { it.overlapsDay(day) }
                 val offLabel = daysOff[day]?.takeIf { day.dayOfWeek.value <= 5 }
-                if (dayOcc.isEmpty() && offLabel == null) return@forEach
                 item(key = "h$day") {
                     val hasConflict = dayOcc.any { it.key in conflictKeys }
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 20.dp, bottom = 8.dp)) {
@@ -170,18 +190,16 @@ fun CalendarScreen(
                             style = MaterialTheme.typography.titleSmall,
                             color = if (day == today) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                         )
-                        if (hasConflict) ToneChip("Konflikt", Sf.colors.error, Icons.Rounded.Warning, Modifier.padding(start = 8.dp))
+                        if (hasConflict) ToneChip("Konflikt", Sf.colors.error, AppIcons.konflikt, Modifier.padding(start = 8.dp))
                     }
                     if (offLabel != null) {
-                        ToneChip("Bez lekcji: $offLabel", Sf.colors.school, Icons.Rounded.EventAvailable, Modifier.padding(bottom = 8.dp))
+                        ToneChip("Bez lekcji: $offLabel", Sf.colors.school, AppIcons.dzienWolny, Modifier.padding(bottom = 8.dp))
                     }
+                    if (dayOcc.isEmpty()) Text("Nic nie zaplanowano.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 dayOcc.forEach { o ->
                     item(key = "o${o.key}_$day") { AgendaCard(o, day, o.key in conflictKeys, onClick = { onOpen(o) }) }
                 }
-            }
-            if (visible.isEmpty()) item {
-                Text("W tym tygodniu nic nie zaplanowano.", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(vertical = 24.dp))
             }
         } else {
             item { MonthGrid(selected, today, visible, daysOff, onSelect = { onSelect(it); mode = 0 }) }
@@ -259,18 +277,18 @@ fun AgendaCard(o: Occurrence, day: LocalDate, conflict: Boolean, onClick: () -> 
                     color = if (important) tone.onContainer else MaterialTheme.colorScheme.onSurface)
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {
                     if (o.children.isNotEmpty()) { KidDots(o.children, 20.dp); Box(Modifier.width(6.dp)) }
-                    val noDriver = o.needsTransport && o.dropOff == null
+                    val noDriver = o.needsDropOff && o.dropOff == null
                     if (noDriver) {
                         Text("Brak kierowcy", style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold), color = sf.error.onContainer)
                     } else if (o.dropOff != null) {
-                        Icon(Icons.Rounded.DirectionsCar, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                        SfIcon(AppIcons.transport, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
                         Text(" ${o.dropOff.name}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else if (o.event.placeName.isNotBlank()) {
                         Text(o.event.placeName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
-            Icon(eventIcon(o.event), null, tint = if (important) tone.onContainer else tone.main, modifier = Modifier.size(22.dp))
+            EventIcon(o.event, if (important) tone.onContainer else tone.main, Modifier.size(22.dp))
         }
     }
 }

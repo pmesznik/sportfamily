@@ -193,4 +193,45 @@ class ScenariosTest {
         assertEquals("", o[1].alsoTake)
         assertEquals("Kuba", week(data(listOf(e)), 1)[0].alsoTake)
     }
+
+    // ---- To samo miejsce: bez przewozu ----
+    private val tenisPlusGeneral = listOf(
+        ev(1, "Tenis", day = mon, start = m(16), end = m(17), place = "Korty ATZ", drop = null, pick = null),
+        ev(2, "Ogolnorozwojowe", day = mon, start = m(17, 15), end = m(18, 15), place = " korty atz ", drop = null, pick = null),
+    )
+
+    @Test fun backToBackAtSamePlaceNeedsNoTransferBetween() {
+        val occ = week(data(tenisPlusGeneral)).associateBy { it.event.id }
+        assertEquals("Ogolnorozwojowe", occ[1L]!!.stayFor)
+        assertEquals("Tenis", occ[2L]!!.stayFrom)
+        assertNull(occ[2L]!!.departure)
+        val kinds = Planner.conflicts(occ.values.toList()).map { it.kind to it.a.event.id }
+        assertTrue((ConflictKind.NO_PICKUP to 1L) !in kinds)
+        assertTrue((ConflictKind.NO_DRIVER to 2L) !in kinds)
+        assertTrue((ConflictKind.NO_DRIVER to 1L) in kinds)
+        assertTrue((ConflictKind.NO_PICKUP to 2L) in kinds)
+    }
+
+    @Test fun differentPlaceOrLongGapStillNeedsTransport() {
+        val far = tenisPlusGeneral.map { if (it.id == 2L) it.copy(placeName = "Hala") else it }
+        assertNull(week(data(far)).first { it.event.id == 2L }.stayFrom)
+        val gap = tenisPlusGeneral.map { if (it.id == 2L) it.copy(startMinute = m(19), endMinute = m(20)) else it }
+        assertNull(week(data(gap)).first { it.event.id == 2L }.stayFrom)
+    }
+
+    @Test fun differentChildAtSamePlaceIsNotAStay() {
+        val d = data(tenisPlusGeneral, links = listOf(EventChild(1, 1), EventChild(2, 2)))
+        assertNull(week(d).first { it.event.id == 2L }.stayFrom)
+    }
+
+    @Test fun schoolAtSamePlaceThenTrainingIsAStay() {
+        val school = ev(1, "Szkola", day = mon, start = m(8), end = m(14), place = "SP 5", cat = Category.SCHOOL, travel = 0, drop = null, pick = null)
+        val training = ev(2, "Trening", day = mon, start = m(14, 30), end = m(16), place = "SP 5", drop = null)
+        assertEquals("Szkola", week(data(listOf(school, training))).first { it.event.id == 2L }.stayFrom)
+    }
+
+    @Test fun blankPlaceNeverCountsAsSamePlace() {
+        val noPlace = tenisPlusGeneral.map { it.copy(placeName = "") }
+        assertTrue(week(data(noPlace)).all { it.stayFrom == null && it.stayFor == null })
+    }
 }

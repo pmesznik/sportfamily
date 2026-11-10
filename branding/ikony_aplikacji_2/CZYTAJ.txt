@@ -1,0 +1,9 @@
+SportFamily, brakujące ikony (22 plików na wersję)
+
+svg/jasne-tlo       kontur granatowy #141B3D, kropka #FF6A1F
+svg/granatowe-tlo   kontur biały #FFFFFF, kropka #FF6A1F, na tło #141B3D
+png/                te same ikony 96 px, przezroczyste tło
+ikony.json          Twoja lista z dopisanym polem plik_wybrana przy zakładkach
+
+Nazwy plików są zgodne z listą. Ikony powiad-* są narysowane tak, żeby działały w jednym
+kolorze: Android maluje małą ikonę powiadomienia jednym kolorem, więc kropka zleje się z konturem.

@@ -1,5 +1,7 @@
 package pl.sportfamily.app.ui.tasks
 
+import pl.sportfamily.app.ui.components.AppIcons
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -58,7 +60,7 @@ fun TasksScreen(
         item { Text("Zadania", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 8.dp)) }
         if (data.tasks.isEmpty()) {
             item {
-                EmptyState(Icons.Rounded.TaskAlt, "Nic do zrobienia", "Opłaty, zgody, zakupy sprzętu. Wpisz je tutaj, a najpilniejsze pokażą się na ekranie Dzisiaj.") {
+                EmptyState(AppIcons.zadanie, "Nic do zrobienia", "Opłaty, zgody, zakupy sprzętu. Wpisz je tutaj, a najpilniejsze pokażą się na ekranie Dzisiaj.") {
                     Button(onClick = { editing = TaskEntity(title = "") }) { Text("Dodaj zadanie") }
                 }
             }

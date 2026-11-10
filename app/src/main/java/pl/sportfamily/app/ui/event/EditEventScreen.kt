@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.event
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.Contacts
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
@@ -135,6 +139,28 @@ fun EditEventScreen(
     var pickUp by rememberSaveable { mutableStateOf<Long?>(null) }
     var notes by rememberSaveable { mutableStateOf("") }
     var alsoTake by rememberSaveable { mutableStateOf("") }
+    var coachName by rememberSaveable { mutableStateOf("") }
+    var coachPhone by rememberSaveable { mutableStateOf("") }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    // Wybór trenera z kontaktów: Android oddaje tylko wybrany wpis, bez dostępu do całej książki.
+    val pickCoach = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { res ->
+        val uri = res.data?.data ?: return@rememberLauncherForActivityResult
+        runCatching {
+            ctx.contentResolver.query(
+                uri,
+                arrayOf(android.provider.ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, android.provider.ContactsContract.CommonDataKinds.Phone.NUMBER),
+                null, null, null,
+            )?.use { c ->
+                if (c.moveToFirst()) { coachName = c.getString(0).orEmpty(); coachPhone = c.getString(1).orEmpty() }
+            }
+        }
+    }
+    var confirmDiscard by remember { mutableStateOf(false) }
+    // Nowe wydarzenie z wpisanym tytułem: przy wyjściu pytamy, żeby nie stracić danych przez przypadek.
+    val tryClose = { if (eventId == null && title.isNotBlank()) confirmDiscard = true else onClose() }
+    androidx.activity.compose.BackHandler(onBack = tryClose)
     var importTag by rememberSaveable { mutableStateOf<String?>(null) }
     val checklist = remember { mutableStateListOf<ChecklistItem>() }
     var newItem by rememberSaveable { mutableStateOf("") }
@@ -153,7 +179,7 @@ fun EditEventScreen(
                 repeatDays = e.repeatDays; everyWeeks = e.repeatEveryWeeks; repeatUntil = e.repeatUntilDay?.let { LocalDate.ofEpochDay(it) }
                 place = e.placeName; address = e.address
                 travel = if (e.travelMinutes > 0) e.travelMinutes.toString() else ""; buffer = e.bufferMinutes.toString()
-                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; alsoTake = e.alsoTake; importTag = e.importTag
+                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; alsoTake = e.alsoTake; coachName = e.coachName; coachPhone = e.coachPhone; importTag = e.importTag
                 checklist.clear(); checklist.addAll(src.checklist)
                 dayRules.clear(); src.dayRules.forEach { dayRules[it.weekday] = it }
             }
@@ -187,6 +213,8 @@ fun EditEventScreen(
             pickUpPersonId = pickUp,
             notes = notes.trim(),
             alsoTake = alsoTake.trim(),
+            coachName = if (category == Category.SPORT) coachName.trim() else "",
+            coachPhone = if (category == Category.SPORT) coachPhone.trim() else "",
             importTag = importTag,
         )
         val rules = if (repeatDays == 0) emptyList()
@@ -199,7 +227,7 @@ fun EditEventScreen(
         topBar = {
             TopAppBar(
                 title = { Text(if (eventId == null) "Nowe wydarzenie" else "Edycja") },
-                navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.Rounded.Close, "Zamknij") } },
+                navigationIcon = { IconButton(onClick = tryClose) { SfIcon(AppIcons.zamknij, "Zamknij") } },
                 actions = { TextButton(onClick = ::save, modifier = Modifier.padding(end = 8.dp)) { Text("Zapisz") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
@@ -234,7 +262,7 @@ fun EditEventScreen(
                             if (c == Category.SCHOOL && travel.isBlank()) { /* szkoła zwykle bez dojazdu */ }
                         },
                         label = { Text(categoryLabel(c)) },
-                        leadingIcon = { Icon(categoryIcon(c), null, tint = sf.of(c).main, modifier = Modifier.size(18.dp)) },
+                        leadingIcon = { SfIcon(categoryIcon(c), null, tint = sf.of(c).main, modifier = Modifier.size(18.dp)) },
                         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = sf.of(c).container, selectedLabelColor = sf.of(c).onContainer),
                         modifier = Modifier.heightIn(min = 40.dp),
                     )
@@ -266,16 +294,16 @@ fun EditEventScreen(
 
             SectionHeader("Kiedy")
             SfCard(Modifier.fillMaxWidth()) {
-                PickRow(Icons.Rounded.CalendarToday, if (repeatDays != 0) "Od" else "Dzień", date.longLabel()) { picker = "date" }
+                PickRow(AppIcons.data, if (repeatDays != 0) "Od" else "Dzień", date.longLabel()) { picker = "date" }
                 SwitchRow("Cały dzień", allDay) { allDay = it }
                 if (repeatDays == 0) {
                     SwitchRow("Kilka dni (turniej, obóz)", multiDay) { multiDay = it; if (it && endDate <= date) endDate = date.plusDays(1) }
-                    if (multiDay) PickRow(Icons.Rounded.CalendarToday, "Do", endDate.longLabel()) { picker = "end" }
+                    if (multiDay) PickRow(AppIcons.data, "Do", endDate.longLabel()) { picker = "end" }
                 }
                 if (!allDay) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
                         OutlinedButton(onClick = { picker = "start" }, modifier = Modifier.weight(1f).heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp)) {
-                            Icon(Icons.Rounded.Schedule, null, Modifier.size(18.dp)); Text("  Od ${minutesLabel(start)}")
+                            SfIcon(AppIcons.wyjazd, null, Modifier.size(18.dp)); Text("  Od ${minutesLabel(start)}")
                         }
                         OutlinedButton(onClick = { picker = "endTime" }, modifier = Modifier.weight(1f).heightIn(min = 52.dp), shape = RoundedCornerShape(14.dp)) {
                             Text("Do ${minutesLabel(end)}")
@@ -323,7 +351,7 @@ fun EditEventScreen(
                         }
                         FilterChip(selected = false, onClick = { repeatDays = 0; dayRules.clear() }, label = { Text("Jednorazowo") }, modifier = Modifier.heightIn(min = 40.dp))
                     }
-                    PickRow(Icons.Rounded.CalendarToday, "Do kiedy", repeatUntil?.longLabel() ?: "bez końca") { picker = "until" }
+                    PickRow(AppIcons.data, "Do kiedy", repeatUntil?.longLabel() ?: "bez końca") { picker = "until" }
 
                     Label("Godziny i osoby w poszczególne dni")
                     SfCard(Modifier.fillMaxWidth(), padding = PaddingValues(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp)) {
@@ -390,7 +418,7 @@ fun EditEventScreen(
             checklist.forEachIndexed { i, item ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(item.text, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f).padding(start = 4.dp))
-                    IconButton(onClick = { checklist.removeAt(i) }) { Icon(Icons.Rounded.Close, "Usuń ${item.text}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = { checklist.removeAt(i) }) { SfIcon(AppIcons.zamknij, "Usuń ${item.text}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
             fun addItem() {
@@ -399,12 +427,23 @@ fun EditEventScreen(
             }
             OutlinedTextField(
                 newItem, { newItem = it }, label = { Text("Dodaj rzecz") }, singleLine = true,
-                trailingIcon = { IconButton(onClick = ::addItem) { Icon(Icons.Rounded.Add, "Dodaj") } },
+                trailingIcon = { IconButton(onClick = ::addItem) { SfIcon(AppIcons.dodaj, "Dodaj") } },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { addItem() }),
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            if (category == Category.SPORT) {
+                SectionHeader("Trener")
+                OutlinedTextField(coachName, { coachName = it }, label = { Text("Imię i nazwisko trenera") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(coachPhone, { coachPhone = it }, label = { Text("Telefon do trenera") }, singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                androidx.compose.material3.OutlinedButton(
+                    onClick = { pickCoach.launch(android.content.Intent(android.content.Intent.ACTION_PICK, android.provider.ContactsContract.CommonDataKinds.Phone.CONTENT_URI)) },
+                    modifier = Modifier.padding(top = 8.dp).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp),
+                ) { SfIcon(AppIcons.kontakty, null); Text("  Wybierz z kontaktów") }
+            }
             SectionHeader("Zabierz też")
             OutlinedTextField(alsoTake, { alsoTake = it }, placeholder = { Text("np. Kuba z klasy, odebrać ze szkoły") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             SectionHeader("Notatki")
@@ -414,6 +453,16 @@ fun EditEventScreen(
                 Text("Zapisz")
             }
         }
+    }
+
+    if (confirmDiscard) {
+        AlertDialog(
+            onDismissRequest = { confirmDiscard = false },
+            title = { Text("Odrzucić wpisane dane?") },
+            text = { Text("To wydarzenie nie zostało zapisane.") },
+            confirmButton = { TextButton(onClick = { confirmDiscard = false; onClose() }) { Text("Odrzuć") } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Wróć do edycji") } },
+        )
     }
 
     editingDay?.let { wd ->
@@ -480,7 +529,7 @@ private fun Label(text: String) {
 @Composable
 private fun PickRow(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, onClick: () -> Unit) {
     TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), contentPadding = PaddingValues(horizontal = 4.dp)) {
-        Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        SfIcon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 12.dp).weight(1f))
         Text(value, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.labelLarge)
     }

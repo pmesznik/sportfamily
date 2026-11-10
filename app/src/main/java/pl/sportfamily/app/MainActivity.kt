@@ -1,5 +1,7 @@
 package pl.sportfamily.app
 
+import pl.sportfamily.app.ui.components.SfIcon
+
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -45,6 +47,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +65,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import pl.sportfamily.app.data.Child
 import pl.sportfamily.app.ui.MainViewModel
+import pl.sportfamily.app.ui.components.AppIcons
 import pl.sportfamily.app.ui.calendar.CalendarScreen
 import pl.sportfamily.app.ui.children.ChildrenScreen
 import pl.sportfamily.app.ui.event.EditEventScreen
@@ -75,8 +79,37 @@ import pl.sportfamily.app.update.UpdateBanner
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        /** Termin do otwarcia z powiadomienia lub widżetu: (id wydarzenia, dzień). */
+        val openRequest = kotlinx.coroutines.flow.MutableStateFlow<Pair<Long, Long>?>(null)
+    }
+
+    private fun readOpenRequest(intent: android.content.Intent?) {
+        val id = intent?.getLongExtra(pl.sportfamily.app.notify.Notifier.EXTRA_EVENT, -1L) ?: -1L
+        val day = intent?.getLongExtra(pl.sportfamily.app.notify.Notifier.EXTRA_DAY, Long.MIN_VALUE) ?: Long.MIN_VALUE
+        if (id > 0 && day != Long.MIN_VALUE) openRequest.value = id to day
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        readOpenRequest(intent)
+    }
+
+    private val askNotifications = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) {
+        pl.sportfamily.app.notify.ReminderScheduler.requestRefresh(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) readOpenRequest(intent)
+        // Raz pytamy o zgodę na powiadomienia (Android 13+). Później można ją włączyć w Więcej > Przypomnienia.
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !pl.sportfamily.app.notify.Notifier.canNotify(this) &&
+            !pl.sportfamily.app.notify.ReminderSettings.askedForPermission(this)
+        ) {
+            pl.sportfamily.app.notify.ReminderSettings.setAskedForPermission(this)
+            askNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
         ThemeSettings.load(this)
         enableEdgeToEdge()
         setContent {
@@ -100,12 +133,12 @@ class MainActivity : ComponentActivity() {
 
 private data class Tab(val route: String, val label: String, val icon: ImageVector, val iconOn: ImageVector)
 
-private val Tabs = listOf(
-    Tab("today", "Dzisiaj", Icons.Outlined.Today, Icons.Rounded.Today),
-    Tab("calendar", "Kalendarz", Icons.Outlined.CalendarMonth, Icons.Rounded.CalendarMonth),
-    Tab("children", "Dzieci", Icons.Outlined.Groups, Icons.Rounded.Groups),
-    Tab("tasks", "Zadania", Icons.Outlined.TaskAlt, Icons.Rounded.TaskAlt),
-    Tab("more", "Więcej", Icons.Rounded.MoreHoriz, Icons.Rounded.MoreHoriz),
+private val Tabs get() = listOf(
+    Tab("today", "Dzisiaj", AppIcons.tabDzisiaj, AppIcons.tabDzisiajOn),
+    Tab("calendar", "Kalendarz", AppIcons.tabKalendarz, AppIcons.tabKalendarzOn),
+    Tab("children", "Dzieci", AppIcons.tabDzieci, AppIcons.tabDzieciOn),
+    Tab("tasks", "Zadania", AppIcons.tabZadania, AppIcons.tabZadaniaOn),
+    Tab("more", "Więcej", AppIcons.tabWiecej, AppIcons.tabWiecej),
 )
 
 @Composable
@@ -116,6 +149,13 @@ private fun App(vm: MainViewModel = viewModel()) {
     val today = now.toLocalDate()
     val backStack by nav.currentBackStackEntryAsState()
     val route = backStack?.destination?.route
+    val open by MainActivity.openRequest.collectAsState()
+    LaunchedEffect(open, data != null) {
+        val (id, day) = open ?: return@LaunchedEffect
+        if (data == null) return@LaunchedEffect
+        MainActivity.openRequest.value = null
+        nav.navigate("event/$id/$day") { launchSingleTop = true }
+    }
     val onTab = Tabs.any { it.route == route }
 
     var calendarDay by rememberSaveable { mutableStateOf(LocalDate.now()) }
@@ -150,7 +190,7 @@ private fun App(vm: MainViewModel = viewModel()) {
                     NavigationBarItem(
                         selected = sel,
                         onClick = { go(t.route) },
-                        icon = { Icon(if (sel) t.iconOn else t.icon, null) },
+                        icon = { SfIcon(if (sel) t.iconOn else t.icon, null, cut = MaterialTheme.colorScheme.primaryContainer) },
                         label = { Text(t.label) },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = MaterialTheme.colorScheme.primaryContainer,
@@ -167,15 +207,15 @@ private fun App(vm: MainViewModel = viewModel()) {
             when (route) {
                 "today", "calendar" -> ExtendedFloatingActionButton(
                     onClick = { nav.navigate("edit?id=-1&day=${(if (route == "calendar") calendarDay else today).toEpochDay()}") },
-                    icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Dodaj") },
+                    icon = { SfIcon(AppIcons.dodaj, null) }, text = { Text("Dodaj") },
                     containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
                 "children" -> if (d.children.isNotEmpty()) ExtendedFloatingActionButton(
-                    onClick = { childRequest = true }, icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Dziecko") },
+                    onClick = { childRequest = true }, icon = { SfIcon(AppIcons.dodaj, null) }, text = { Text("Dziecko") },
                     containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
                 "tasks" -> ExtendedFloatingActionButton(
-                    onClick = { taskRequest = true }, icon = { Icon(Icons.Rounded.Add, null) }, text = { Text("Zadanie") },
+                    onClick = { taskRequest = true }, icon = { SfIcon(AppIcons.dodaj, null) }, text = { Text("Zadanie") },
                     containerColor = Sf.colors.accent, contentColor = Sf.colors.onAccent,
                 )
             }

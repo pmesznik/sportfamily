@@ -55,6 +55,10 @@ data class Occurrence(
     val dayRule: pl.sportfamily.app.data.EventDayRule? = null,
     /** Kogo jeszcze zabrać w tym terminie (termin, potem seria). */
     val alsoTake: String = "",
+    /** Dziecko jest już na miejscu po poprzednich zajęciach w tym samym miejscu (nazwa tamtych zajęć). */
+    val stayFrom: String? = null,
+    /** Dziecko zostaje na miejscu na kolejne zajęcia w tym samym miejscu (nazwa tamtych zajęć). */
+    val stayFor: String? = null,
 ) {
     val key: String get() = "${event.id}_${date.toEpochDay()}"
     val allDay: Boolean get() = event.allDay
@@ -62,10 +66,13 @@ data class Occurrence(
 
     /** Godzina wyjazdu: start minus dojazd minus zapas. Brak, gdy dojazd nieustawiony. */
     val departure: LocalDateTime?
-        get() = if (event.travelMinutes > 0 && !event.allDay)
+        get() = if (event.travelMinutes > 0 && !event.allDay && stayFrom == null)
             start.minusMinutes((event.travelMinutes + event.bufferMinutes).toLong()) else null
 
     val checklistDone: Int get() = checklist.count { it.id in checkedIds }
+    /** Czy trzeba kogoś do zawiezienia / odbioru: nie, gdy dziecko zostaje w tym samym miejscu na kolejne zajęcia. */
+    val needsDropOff: Boolean get() = needsTransport && stayFrom == null
+    val needsPickUp: Boolean get() = needsTransport && stayFor == null
     val needsTransport: Boolean
         get() = (event.travelMinutes > 0 || event.placeName.isNotBlank()) && !event.allDay && event.category != Category.SCHOOL
 
@@ -165,6 +172,29 @@ object Planner {
                 )
             }
         }.sortedWith(compareBy<Occurrence>({ !it.allDay }, { it.start }, { it.event.title }))
+            .let { markStays(it) }
+    }
+
+    /** Maks. przerwa, w której dziecko zostaje na miejscu między zajęciami w tym samym miejscu. */
+    const val STAY_GAP_MINUTES = 90L
+
+    private fun place(o: Occurrence) = o.event.placeName.trim().lowercase()
+
+    /** Zajęcia w tym samym miejscu jedne po drugich (np. tenis i ogólnorozwojowe na tych samych kortach): bez przewozu. */
+    private fun markStays(all: List<Occurrence>): List<Occurrence> {
+        val timed = all.filter { !it.allDay && !it.multiDay && place(it).isNotEmpty() }
+        fun follows(a: Occurrence, b: Occurrence): Boolean =
+            a.event.id != b.event.id && a.date == b.date && place(a) == place(b) &&
+                a.children.any { c -> b.children.any { it.id == c.id } } &&
+                !a.end.isAfter(b.start) && java.time.Duration.between(a.end, b.start).toMinutes() <= STAY_GAP_MINUTES
+        return all.map { o ->
+            if (o !in timed) o
+            else {
+                val prev = timed.filter { follows(it, o) }.maxByOrNull { it.end }
+                val next = timed.filter { follows(o, it) }.minByOrNull { it.start }
+                if (prev == null && next == null) o else o.copy(stayFrom = prev?.event?.title, stayFor = next?.event?.title)
+            }
+        }
     }
 
     /**
@@ -173,8 +203,8 @@ object Planner {
      */
     fun conflicts(occ: List<Occurrence>): List<Conflict> {
         val out = ArrayList<Conflict>()
-        occ.filter { it.needsTransport && it.dropOff == null }.forEach { out += Conflict(ConflictKind.NO_DRIVER, it) }
-        occ.filter { it.needsTransport && it.pickUp == null }.forEach { out += Conflict(ConflictKind.NO_PICKUP, it) }
+        occ.filter { it.needsDropOff && it.dropOff == null }.forEach { out += Conflict(ConflictKind.NO_DRIVER, it) }
+        occ.filter { it.needsPickUp && it.pickUp == null }.forEach { out += Conflict(ConflictKind.NO_PICKUP, it) }
 
         val timed = occ.filter { !it.allDay && !it.multiDay }
         for (i in timed.indices) for (j in i + 1 until timed.size) {
@@ -194,7 +224,7 @@ object Planner {
                 out += Conflict(ConflictKind.DRIVER_OVERLAP, a, b)
                 continue
             }
-            if (a.pickUp != null && a.pickUp.id == b.pickUp?.id && a.event.placeName != b.event.placeName &&
+            if (a.pickUp != null && a.pickUp.id == b.pickUp?.id && a.event.placeName != b.event.placeName && a.stayFor == null && b.stayFor == null &&
                 overlaps(a.end, a.end.plusMinutes(a.event.travelMinutes.toLong()), b.end, b.end.plusMinutes(b.event.travelMinutes.toLong()))
             ) {
                 out += Conflict(ConflictKind.DRIVER_OVERLAP, a, b)
@@ -210,6 +240,7 @@ object Planner {
 
     /** [pick] odbiera osoba, która w tym samym czasie ma zawieźć [drop]. */
     private fun pickThenDrop(pick: Occurrence, drop: Occurrence): Boolean {
+        if (pick.stayFor != null) return false
         val who = pick.pickUp ?: return false
         if (who.id != drop.dropOff?.id) return false
         val dep = drop.departure ?: return false

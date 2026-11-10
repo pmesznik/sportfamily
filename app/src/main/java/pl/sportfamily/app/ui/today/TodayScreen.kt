@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.today
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -128,7 +131,7 @@ fun TodayScreen(
             item {
                 pl.sportfamily.app.ui.components.BrandLockup(Modifier.fillMaxWidth().padding(top = 24.dp), logoHeight = 56.dp)
                 EmptyState(
-                    icon = Icons.Rounded.CalendarMonth,
+                    icon = AppIcons.tabKalendarz,
                     title = "Zacznijmy od dzieci",
                     text = "Dodaj dzieci i ich stałe zajęcia. Aplikacja sama ułoży plan dnia, policzy godzinę wyjazdu i przypomni o sprzęcie.",
                 ) {
@@ -146,7 +149,7 @@ fun TodayScreen(
         val offTomorrow = data.daysOff(tomorrow, tomorrow)[tomorrow]?.takeIf { tomorrow.dayOfWeek.value <= 5 }
         if (data.events.any { it.category == Category.SCHOOL } && (offToday != null || offTomorrow != null)) item(key = "dayoff") {
             val text = offToday?.let { "Dziś bez lekcji: $it" } ?: "Jutro bez lekcji: $offTomorrow"
-            ToneChip(text, Sf.colors.school, Icons.Rounded.EventAvailable, Modifier.padding(bottom = 10.dp))
+            ToneChip(text, Sf.colors.school, AppIcons.dzienWolny, Modifier.padding(bottom = 10.dp))
         }
 
         conflicts.take(2).forEach { c -> item(key = "c_${c.kind}_${c.a.key}_${c.b?.key}") { ConflictBanner(c, today) { onOpen(c.a) }; VSpace(8.dp) } }
@@ -217,7 +220,7 @@ private fun ConflictBanner(c: Conflict, today: LocalDate, onClick: () -> Unit) {
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Rounded.Warning, null, tint = tone.onContainer)
+        SfIcon(AppIcons.konflikt, null, tint = tone.onContainer)
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(title, color = tone.onContainer, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
             Text(sub, color = tone.onContainer, style = MaterialTheme.typography.bodySmall)
@@ -252,7 +255,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-            Icon(eventIcon(o.event), null, tint = sf.of(o.event.category).main, modifier = Modifier.size(22.dp))
+            pl.sportfamily.app.ui.components.EventIcon(o.event, sf.of(o.event.category).main, Modifier.size(22.dp))
             Text(o.event.title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(start = 8.dp))
         }
         if (o.children.isNotEmpty()) {
@@ -262,7 +265,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
         Column(Modifier.padding(top = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             o.departure?.let { dep ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    ToneChip("Wyjazd ${dep.hm()}", sf.important, Icons.Rounded.Schedule)
+                    ToneChip("Wyjazd ${dep.hm()}", sf.important, AppIcons.wyjazd)
                     Text(
                         "${o.event.travelMinutes} min dojazdu + ${o.event.bufferMinutes} min zapasu",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -271,11 +274,18 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
                 }
             }
             if (o.event.placeName.isNotBlank() || o.event.address.isNotBlank()) {
-                InfoRow(Icons.Rounded.LocationOn, o.event.placeName.ifBlank { o.event.address }, o.event.address.takeIf { o.event.placeName.isNotBlank() && it.isNotBlank() })
+                InfoRow(AppIcons.miejsce, o.event.placeName.ifBlank { o.event.address }, o.event.address.takeIf { o.event.placeName.isNotBlank() && it.isNotBlank() })
             }
-            if (o.needsTransport || o.dropOff != null || o.pickUp != null) {
+            if (o.stayFrom != null || o.stayFor != null) {
                 InfoRow(
-                    Icons.Rounded.DirectionsCar,
+                    AppIcons.transport,
+                    if (o.stayFrom != null) "Bez dojazdu: już na miejscu po ${o.stayFrom}" else "Wiezie: " + (o.dropOff?.name ?: "nieprzypisane"),
+                    if (o.stayFor != null) "Zostaje na miejscu na ${o.stayFor}, bez odbioru" else o.pickUp?.let { "Odbiera: ${it.name}, ${o.end.hm()}" },
+                    warn = o.needsDropOff && o.dropOff == null,
+                )
+            } else if (o.needsTransport || o.dropOff != null || o.pickUp != null) {
+                InfoRow(
+                    AppIcons.transport,
                     "Wiezie: " + (o.dropOff?.name ?: "nieprzypisane"),
                     o.pickUp?.let { "Odbiera: ${it.name}, ${o.end.hm()}" },
                     warn = o.needsTransport && o.dropOff == null,
@@ -286,7 +296,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
         if (o.checklist.isNotEmpty()) {
             Box(Modifier.padding(vertical = 14.dp).fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outlineVariant))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.Backpack, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                SfIcon(AppIcons.listaRzeczy, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                 Text("Do zabrania", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(start = 6.dp).weight(1f))
                 Text("${o.checklistDone} z ${o.checklist.size}", style = MaterialTheme.typography.labelLarge)
             }
@@ -304,7 +314,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
                             .padding(horizontal = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        if (done) Icon(Icons.Rounded.Check, null, tint = tone.onContainer, modifier = Modifier.size(16.dp).padding(end = 2.dp))
+                        if (done) SfIcon(AppIcons.zaznaczone, null, tint = tone.onContainer, modifier = Modifier.size(16.dp).padding(end = 2.dp))
                         Text(item.text, style = MaterialTheme.typography.bodySmall, color = tone.onContainer)
                     }
                 }
@@ -318,7 +328,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
-                    Icon(Icons.Rounded.Navigation, null, Modifier.size(20.dp)); Text("  Nawiguj")
+                    SfIcon(AppIcons.nawigacja, null, Modifier.size(20.dp)); Text("  Nawiguj")
                 }
             }
             FilledTonalButton(
@@ -326,7 +336,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
                 modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-            ) { Icon(Icons.Rounded.Checklist, null, Modifier.size(20.dp)); Text("  Szczegóły") }
+            ) { SfIcon(AppIcons.listaRzeczy, null, Modifier.size(20.dp)); Text("  Szczegóły") }
         }
     }
 }
@@ -335,7 +345,7 @@ private fun HeroCard(o: Occurrence, now: LocalDateTime, onOpen: () -> Unit, onTo
 private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, sub: String?, warn: Boolean = false) {
     val tint = if (warn) Sf.colors.error.main else MaterialTheme.colorScheme.onSurfaceVariant
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp))
+        SfIcon(icon, null, tint = tint, modifier = Modifier.size(22.dp))
         Column(Modifier.padding(start = 12.dp)) {
             Text(title, style = MaterialTheme.typography.bodyMedium, color = if (warn) Sf.colors.error.onContainer else MaterialTheme.colorScheme.onSurface)
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -400,7 +410,7 @@ private fun TimelineRow(row: TimelineItem, now: LocalDateTime, onClick: () -> Un
                 Modifier.weight(1f).padding(vertical = 4.dp).clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Rounded.DirectionsCar, null, tint = tone.main.copy(alpha = alpha), modifier = Modifier.size(20.dp))
+                SfIcon(AppIcons.transport, null, tint = tone.main.copy(alpha = alpha), modifier = Modifier.size(20.dp))
                 Column(Modifier.padding(start = 10.dp)) {
                     Text("Wyjazd: ${o.event.title.lowercase()}", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
                     Text(
@@ -445,7 +455,7 @@ private fun TimelineRow(row: TimelineItem, now: LocalDateTime, onClick: () -> Un
                                 )
                             }
                         }
-                        Icon(eventIcon(o.event), null, tint = tone.main.copy(alpha = alpha), modifier = Modifier.size(20.dp))
+                        pl.sportfamily.app.ui.components.EventIcon(o.event, tone.main.copy(alpha = alpha), Modifier.size(20.dp))
                     }
                 }
             }

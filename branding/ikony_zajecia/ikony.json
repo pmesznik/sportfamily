@@ -1,0 +1,955 @@
+[
+ {
+  "plik": "spiew.svg",
+  "nazwa": "Śpiew",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "śpiew",
+   "wokal",
+   "chór"
+  ]
+ },
+ {
+  "plik": "pianino.svg",
+  "nazwa": "Pianino",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "pian",
+   "fortepian",
+   "keyboard"
+  ]
+ },
+ {
+  "plik": "gitara.svg",
+  "nazwa": "Gitara",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "gitar",
+   "ukulele"
+  ]
+ },
+ {
+  "plik": "perkusja.svg",
+  "nazwa": "Perkusja",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "perkus",
+   "bęb"
+  ]
+ },
+ {
+  "plik": "rytmika.svg",
+  "nazwa": "Rytmika",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "rytmik",
+   "muzy",
+   "umuzykal"
+  ]
+ },
+ {
+  "plik": "flet.svg",
+  "nazwa": "Flet",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "flet",
+   "klarnet",
+   "trąbk",
+   "saksofon"
+  ]
+ },
+ {
+  "plik": "produkcja-muzyki.svg",
+  "nazwa": "Produkcja muzyki",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "dj",
+   "produkcja muz",
+   "nagran"
+  ]
+ },
+ {
+  "plik": "chor.svg",
+  "nazwa": "Chór",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "chór",
+   "zespół wokal",
+   "schola"
+  ]
+ },
+ {
+  "plik": "cymbalki.svg",
+  "nazwa": "Cymbałki",
+  "grupa": "Muzyka",
+  "slowa_kluczowe": [
+   "cymbał",
+   "dzwonk",
+   "ksylofon"
+  ]
+ },
+ {
+  "plik": "malowanie.svg",
+  "nazwa": "Malowanie",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "malow",
+   "malar",
+   "plasty"
+  ]
+ },
+ {
+  "plik": "rysunek.svg",
+  "nazwa": "Rysunek",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "rysun",
+   "rysow",
+   "szkic",
+   "komiks"
+  ]
+ },
+ {
+  "plik": "ceramika.svg",
+  "nazwa": "Ceramika",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "ceram",
+   "glin",
+   "garncar"
+  ]
+ },
+ {
+  "plik": "fotografia.svg",
+  "nazwa": "Fotografia",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "foto",
+   "zdjęc"
+  ]
+ },
+ {
+  "plik": "film.svg",
+  "nazwa": "Film",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "film",
+   "wideo",
+   "animacj"
+  ]
+ },
+ {
+  "plik": "origami.svg",
+  "nazwa": "Origami",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "origami",
+   "papier"
+  ]
+ },
+ {
+  "plik": "kaligrafia.svg",
+  "nazwa": "Kaligrafia",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "kaligraf",
+   "liternic"
+  ]
+ },
+ {
+  "plik": "grafika-komputerowa.svg",
+  "nazwa": "Grafika komputerowa",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "grafik",
+   "photoshop",
+   "canva",
+   "projektow"
+  ]
+ },
+ {
+  "plik": "moda.svg",
+  "nazwa": "Moda i projektowanie",
+  "grupa": "Sztuka",
+  "slowa_kluczowe": [
+   "moda",
+   "ubra",
+   "stylizac"
+  ]
+ },
+ {
+  "plik": "teatr.svg",
+  "nazwa": "Teatr",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "teatr",
+   "aktor",
+   "drama"
+  ]
+ },
+ {
+  "plik": "taniec.svg",
+  "nazwa": "Taniec",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "taniec",
+   "tanecz",
+   "hip hop",
+   "zumba"
+  ]
+ },
+ {
+  "plik": "balet.svg",
+  "nazwa": "Balet",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "balet"
+  ]
+ },
+ {
+  "plik": "iluzja.svg",
+  "nazwa": "Iluzja",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "iluzj",
+   "magi",
+   "czarod"
+  ]
+ },
+ {
+  "plik": "cyrk.svg",
+  "nazwa": "Cyrk i żonglerka",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "cyrk",
+   "żongl",
+   "akrobat"
+  ]
+ },
+ {
+  "plik": "debata.svg",
+  "nazwa": "Debata i wystąpienia",
+  "grupa": "Scena",
+  "slowa_kluczowe": [
+   "debat",
+   "orator",
+   "wystąpie",
+   "retory"
+  ]
+ },
+ {
+  "plik": "programowanie.svg",
+  "nazwa": "Programowanie",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "program",
+   "kodow",
+   "scratch",
+   "python"
+  ]
+ },
+ {
+  "plik": "robotyka.svg",
+  "nazwa": "Robotyka",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "robot",
+   "lego mind"
+  ]
+ },
+ {
+  "plik": "matematyka.svg",
+  "nazwa": "Matematyka",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "matem",
+   "liczen",
+   "sudoku"
+  ]
+ },
+ {
+  "plik": "eksperymenty.svg",
+  "nazwa": "Eksperymenty",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "eksperym",
+   "chemi",
+   "fizy",
+   "nauk",
+   "laborat"
+  ]
+ },
+ {
+  "plik": "astronomia.svg",
+  "nazwa": "Astronomia",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "astronom",
+   "kosmos",
+   "gwiazd"
+  ]
+ },
+ {
+  "plik": "elektronika.svg",
+  "nazwa": "Elektronika i wynalazki",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "elektron",
+   "wynalaz",
+   "majsterk",
+   "technik"
+  ]
+ },
+ {
+  "plik": "klocki.svg",
+  "nazwa": "Klocki",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "klock",
+   "lego",
+   "konstrukc"
+  ]
+ },
+ {
+  "plik": "szachy.svg",
+  "nazwa": "Szachy",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "szach"
+  ]
+ },
+ {
+  "plik": "gry-planszowe.svg",
+  "nazwa": "Gry planszowe",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "plansz",
+   "gry",
+   "brydż"
+  ]
+ },
+ {
+  "plik": "druk-3d.svg",
+  "nazwa": "Druk 3D",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "druk 3d",
+   "3d",
+   "modelowanie"
+  ]
+ },
+ {
+  "plik": "modelarstwo.svg",
+  "nazwa": "Modelarstwo",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "modelar",
+   "samolot",
+   "dron",
+   "lotnic"
+  ]
+ },
+ {
+  "plik": "geografia.svg",
+  "nazwa": "Geografia i podróże",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "geograf",
+   "podróż",
+   "krajozn"
+  ]
+ },
+ {
+  "plik": "historia.svg",
+  "nazwa": "Historia",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "histor",
+   "archeolog",
+   "muzeum"
+  ]
+ },
+ {
+  "plik": "przedsiebiorczosc.svg",
+  "nazwa": "Przedsiębiorczość",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "przedsiębior",
+   "ekonom",
+   "finans",
+   "biznes"
+  ]
+ },
+ {
+  "plik": "lamiglowki.svg",
+  "nazwa": "Łamigłówki",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "łamigłów",
+   "puzzle",
+   "logiczn",
+   "zagadk"
+  ]
+ },
+ {
+  "plik": "gry-komputerowe.svg",
+  "nazwa": "Gry komputerowe",
+  "grupa": "Nauka i technika",
+  "slowa_kluczowe": [
+   "gry komp",
+   "e-sport",
+   "esport",
+   "minecraft",
+   "gaming"
+  ]
+ },
+ {
+  "plik": "angielski.svg",
+  "nazwa": "Angielski",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "angiel",
+   "english"
+  ]
+ },
+ {
+  "plik": "jezyki-obce.svg",
+  "nazwa": "Języki obce",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "język",
+   "niemiec",
+   "hiszp",
+   "francus",
+   "włoski"
+  ]
+ },
+ {
+  "plik": "czytanie.svg",
+  "nazwa": "Czytanie",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "czytan",
+   "książ",
+   "bibliot"
+  ]
+ },
+ {
+  "plik": "logopeda.svg",
+  "nazwa": "Logopeda",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "logoped",
+   "wymow",
+   "dykcj"
+  ]
+ },
+ {
+  "plik": "korepetycje.svg",
+  "nazwa": "Korepetycje",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "korepet",
+   "douczan",
+   "wyrównaw"
+  ]
+ },
+ {
+  "plik": "pisanie.svg",
+  "nazwa": "Pisanie kreatywne",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "pisani",
+   "literac",
+   "dzienni"
+  ]
+ },
+ {
+  "plik": "gazetka.svg",
+  "nazwa": "Gazetka szkolna",
+  "grupa": "Języki i słowo",
+  "slowa_kluczowe": [
+   "gazet",
+   "dziennikar",
+   "redakc",
+   "podcast"
+  ]
+ },
+ {
+  "plik": "szycie.svg",
+  "nazwa": "Szycie",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "szyci",
+   "krawie",
+   "hafto",
+   "szydeł"
+  ]
+ },
+ {
+  "plik": "rekodzielo.svg",
+  "nazwa": "Rękodzieło",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "rękodz",
+   "wycinan",
+   "decoup",
+   "kreatywn"
+  ]
+ },
+ {
+  "plik": "gotowanie.svg",
+  "nazwa": "Gotowanie",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "gotow",
+   "kulinar",
+   "piecz"
+  ]
+ },
+ {
+  "plik": "ogrodnictwo.svg",
+  "nazwa": "Ogrodnictwo",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "ogrod",
+   "rośl",
+   "działk"
+  ]
+ },
+ {
+  "plik": "harcerstwo.svg",
+  "nazwa": "Harcerstwo",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "harcer",
+   "zuch",
+   "zbiórk",
+   "skaut"
+  ]
+ },
+ {
+  "plik": "majsterkowanie.svg",
+  "nazwa": "Majsterkowanie",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "majsterk",
+   "stolar",
+   "warsztat"
+  ]
+ },
+ {
+  "plik": "dziewiarstwo.svg",
+  "nazwa": "Dziewiarstwo",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "dziewiar",
+   "druty",
+   "włóczk",
+   "makram"
+  ]
+ },
+ {
+  "plik": "pieczenie.svg",
+  "nazwa": "Pieczenie",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "piecz",
+   "cukiern",
+   "ciast",
+   "babeczk"
+  ]
+ },
+ {
+  "plik": "zwierzeta.svg",
+  "nazwa": "Opieka nad zwierzętami",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "zwierz",
+   "pies",
+   "kot",
+   "schronisk",
+   "weteryn"
+  ]
+ },
+ {
+  "plik": "wolontariat.svg",
+  "nazwa": "Wolontariat",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "wolontar",
+   "pomoc",
+   "charyt"
+  ]
+ },
+ {
+  "plik": "pierwsza-pomoc.svg",
+  "nazwa": "Pierwsza pomoc",
+  "grupa": "Rękodzieło i dom",
+  "slowa_kluczowe": [
+   "pierwsza pomoc",
+   "ratown",
+   "medycz"
+  ]
+ },
+ {
+  "plik": "joga.svg",
+  "nazwa": "Joga",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "joga",
+   "medytac",
+   "relaks"
+  ]
+ },
+ {
+  "plik": "jazda-konna.svg",
+  "nazwa": "Jazda konna",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "konn",
+   "koni",
+   "stajni",
+   "hipoter"
+  ]
+ },
+ {
+  "plik": "lucznictwo.svg",
+  "nazwa": "Łucznictwo",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "łuczni",
+   "strzelec"
+  ]
+ },
+ {
+  "plik": "wedkarstwo.svg",
+  "nazwa": "Wędkarstwo",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "wędk",
+   "ryb"
+  ]
+ },
+ {
+  "plik": "przyroda.svg",
+  "nazwa": "Przyroda i ekologia",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "przyrod",
+   "ekolog",
+   "biolog",
+   "las"
+  ]
+ },
+ {
+  "plik": "turystyka.svg",
+  "nazwa": "Turystyka górska",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "turyst",
+   "góry",
+   "wędrów",
+   "rajd"
+  ]
+ },
+ {
+  "plik": "survival.svg",
+  "nazwa": "Survival i ognisko",
+  "grupa": "Ruch i przyroda",
+  "slowa_kluczowe": [
+   "survival",
+   "ognisk",
+   "bushcraft",
+   "biwak"
+  ]
+ },
+ {
+  "plik": "tenis.svg",
+  "nazwa": "Tenis",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "tenis"
+  ]
+ },
+ {
+  "plik": "pilka-nozna.svg",
+  "nazwa": "Piłka nożna",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "piłka noż",
+   "piłk",
+   "mecz",
+   "futbol",
+   "orlik"
+  ]
+ },
+ {
+  "plik": "koszykowka.svg",
+  "nazwa": "Koszykówka",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "koszyk",
+   "basket"
+  ]
+ },
+ {
+  "plik": "siatkowka.svg",
+  "nazwa": "Siatkówka",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "siatk"
+  ]
+ },
+ {
+  "plik": "pilka-reczna.svg",
+  "nazwa": "Piłka ręczna",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "piłka ręcz",
+   "ręczn",
+   "szczypior"
+  ]
+ },
+ {
+  "plik": "tenis-stolowy.svg",
+  "nazwa": "Tenis stołowy",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "tenis stoł",
+   "ping"
+  ]
+ },
+ {
+  "plik": "badminton.svg",
+  "nazwa": "Badminton",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "badmint",
+   "lotk"
+  ]
+ },
+ {
+  "plik": "golf.svg",
+  "nazwa": "Golf",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "golf"
+  ]
+ },
+ {
+  "plik": "baseball.svg",
+  "nazwa": "Baseball",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "baseball",
+   "softball",
+   "palant"
+  ]
+ },
+ {
+  "plik": "rugby.svg",
+  "nazwa": "Rugby",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "rugby",
+   "futbol ameryk"
+  ]
+ },
+ {
+  "plik": "kregle.svg",
+  "nazwa": "Kręgle",
+  "grupa": "Sport: piłki i rakiety",
+  "slowa_kluczowe": [
+   "kręgl",
+   "bowling"
+  ]
+ },
+ {
+  "plik": "plywanie.svg",
+  "nazwa": "Pływanie",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "pływ",
+   "basen"
+  ]
+ },
+ {
+  "plik": "zeglarstwo.svg",
+  "nazwa": "Żeglarstwo",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "żegl",
+   "jacht",
+   "optimist"
+  ]
+ },
+ {
+  "plik": "kajakarstwo.svg",
+  "nazwa": "Kajakarstwo",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "kajak",
+   "wiośl",
+   "kanad"
+  ]
+ },
+ {
+  "plik": "narciarstwo.svg",
+  "nazwa": "Narciarstwo",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "nart",
+   "narciar",
+   "stok"
+  ]
+ },
+ {
+  "plik": "snowboard.svg",
+  "nazwa": "Snowboard",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "snowboard",
+   "deska śnieg"
+  ]
+ },
+ {
+  "plik": "lyzwiarstwo.svg",
+  "nazwa": "Łyżwiarstwo",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "łyżw",
+   "lodowisk"
+  ]
+ },
+ {
+  "plik": "hokej.svg",
+  "nazwa": "Hokej",
+  "grupa": "Sport: woda i zima",
+  "slowa_kluczowe": [
+   "hokej",
+   "unihokej"
+  ]
+ },
+ {
+  "plik": "judo-karate.svg",
+  "nazwa": "Judo i karate",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "judo",
+   "karate",
+   "taekwon",
+   "aikido",
+   "walk"
+  ]
+ },
+ {
+  "plik": "boks.svg",
+  "nazwa": "Boks",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "boks",
+   "kickbox"
+  ]
+ },
+ {
+  "plik": "szermierka.svg",
+  "nazwa": "Szermierka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "szermier",
+   "floret",
+   "szpad"
+  ]
+ },
+ {
+  "plik": "lekkoatletyka.svg",
+  "nazwa": "Lekkoatletyka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "lekkoatlet",
+   "bieg",
+   "sprint",
+   "sks"
+  ]
+ },
+ {
+  "plik": "gimnastyka.svg",
+  "nazwa": "Gimnastyka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "gimnast",
+   "akrobat",
+   "korekcyj"
+  ]
+ },
+ {
+  "plik": "kolarstwo.svg",
+  "nazwa": "Kolarstwo",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "kolar",
+   "rower",
+   "mtb",
+   "bmx"
+  ]
+ },
+ {
+  "plik": "wspinaczka.svg",
+  "nazwa": "Wspinaczka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "wspin",
+   "ściank",
+   "boulder"
+  ]
+ },
+ {
+  "plik": "deskorolka.svg",
+  "nazwa": "Deskorolka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "deskorol",
+   "skate",
+   "hulajn"
+  ]
+ },
+ {
+  "plik": "rolki.svg",
+  "nazwa": "Rolki",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "rolk",
+   "wrotk"
+  ]
+ },
+ {
+  "plik": "silownia.svg",
+  "nazwa": "Siłownia i fitness",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "siłown",
+   "fitness",
+   "crossfit",
+   "trening"
+  ]
+ },
+ {
+  "plik": "trampoliny.svg",
+  "nazwa": "Trampoliny",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "trampolin",
+   "skoki"
+  ]
+ },
+ {
+  "plik": "skakanka.svg",
+  "nazwa": "Skakanka",
+  "grupa": "Sport: siła i ruch",
+  "slowa_kluczowe": [
+   "skakank",
+   "ogólnorozw"
+  ]
+ }
+]

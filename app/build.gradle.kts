@@ -23,8 +23,8 @@ android {
         minSdk = 26
         targetSdk = 36
         // Każde wydanie: zwiększ versionCode o 1 (aplikacja porównuje go z update.json).
-        versionCode = 12
-        versionName = "0.12"
+        versionCode = 13
+        versionName = "0.13"
         buildConfigField("String", "UPDATE_MANIFEST_URL", "\"${update.getProperty("manifestUrl", "")}\"")
     }
 
@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.glance.appwidget)
     ksp(libs.androidx.room.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
 

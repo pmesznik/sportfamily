@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.more
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -98,12 +101,12 @@ fun MoreScreen(
                         onClick = { ThemeSettings.set(context, m) },
                         shape = SegmentedButtonDefaults.itemShape(i, ThemeMode.entries.size),
                         icon = {
-                            SegmentedButtonDefaults.Icon(active = mode == m) {
-                                Icon(
+                            SegmentedButtonDefaults.Icon(active = mode == m, activeContent = { SfIcon(AppIcons.zaznaczone, null, Modifier.size(SegmentedButtonDefaults.IconSize)) }) {
+                                SfIcon(
                                     when (m) {
-                                        ThemeMode.SYSTEM -> Icons.Rounded.BrightnessAuto
-                                        ThemeMode.LIGHT -> Icons.Rounded.LightMode
-                                        ThemeMode.DARK -> Icons.Rounded.DarkMode
+                                        ThemeMode.SYSTEM -> AppIcons.motywAuto
+                                        ThemeMode.LIGHT -> AppIcons.motywJasny
+                                        ThemeMode.DARK -> AppIcons.motywCiemny
                                     },
                                     null, modifier = Modifier.size(SegmentedButtonDefaults.IconSize),
                                 )
@@ -114,12 +117,16 @@ fun MoreScreen(
             }
         }
 
+        RemindersSection(data.persons)
+
+        ActivityIconsSection()
+
         SectionHeader("Kto wozi dzieci", "Dodaj") { editing = Person(name = "") }
         SfCard(Modifier.fillMaxWidth(), padding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
             if (data.persons.isEmpty()) Text("Brak osób", Modifier.padding(8.dp))
             data.persons.forEach { p ->
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-                    IconBadge(Icons.Rounded.Person, Sf.colors.brand)
+                    IconBadge(AppIcons.osoba, Sf.colors.brand)
                     TextButton(onClick = { editing = p }, modifier = Modifier.weight(1f)) {
                         Column(Modifier.fillMaxWidth()) {
                             Text(p.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -129,10 +136,10 @@ fun MoreScreen(
                     if (p.phone.isNotBlank()) {
                         val ctx = androidx.compose.ui.platform.LocalContext.current
                         IconButton(onClick = { pl.sportfamily.app.ui.dial(ctx, p.phone) }) {
-                            Icon(androidx.compose.material.icons.Icons.Rounded.Call, "Zadzwoń: ${p.name}", tint = Sf.colors.brand.main)
+                            SfIcon(AppIcons.telefon, "Zadzwoń: ${p.name}", tint = Sf.colors.brand.main)
                         }
                     }
-                    IconButton(onClick = { onDeletePerson(p) }) { Icon(Icons.Rounded.DeleteOutline, "Usuń ${p.name}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = { onDeletePerson(p) }) { SfIcon(AppIcons.usun, "Usuń ${p.name}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
         }
@@ -156,10 +163,10 @@ fun MoreScreen(
             )
             Row(Modifier.padding(top = 12.dp), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { pickFile.launch(arrayOf(XLSX_MIME, "application/vnd.ms-excel", "application/octet-stream")) }) {
-                    Icon(Icons.Rounded.FileUpload, null); Text("  Importuj")
+                    SfIcon(AppIcons.importuj, null); Text("  Importuj")
                 }
                 OutlinedButton(onClick = { createFile.launch("SportFamily_plan_${java.time.LocalDate.now()}.xlsx") }) {
-                    Icon(Icons.Rounded.FileDownload, null); Text("  Eksportuj")
+                    SfIcon(AppIcons.eksportuj, null); Text("  Eksportuj")
                 }
             }
             if (message != null) {
@@ -175,7 +182,7 @@ fun MoreScreen(
                 style = MaterialTheme.typography.bodyMedium,
             )
             OutlinedButton(onClick = { confirmDemo = true }, modifier = Modifier.padding(top = 12.dp)) {
-                Icon(Icons.Rounded.Add, null); Text("  Wczytaj przykładowy tydzień")
+                SfIcon(AppIcons.przyklad, null); Text("  Wczytaj przykładowy tydzień")
             }
         }
 
@@ -194,14 +201,12 @@ fun MoreScreen(
         SectionHeader("Wkrótce")
         SfCard(Modifier.fillMaxWidth()) {
             listOf(
-                "Przypomnienia: dzień wcześniej, 2 h przed i czas wyjazdu",
-                "Widgety na ekran główny",
                 "Tryb W drodze z mapą",
                 "Plan nauki do sprawdzianów",
                 "Statystyki i wydatki",
             ).forEach { Text("•  $it", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 3.dp)) }
         }
-        Text("SportFamily 0.1", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 24.dp, bottom = 80.dp))
+        Text("SportFamily Kalendarz ${pl.sportfamily.app.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 24.dp, bottom = 80.dp))
     }
 
     if (importDraft != null) {
@@ -245,7 +250,7 @@ fun MoreScreen(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Icon(androidx.compose.material.icons.Icons.Rounded.Contacts, null); Text("  Wybierz z kontaktów") }
+                    ) { SfIcon(AppIcons.kontakty, null); Text("  Wybierz z kontaktów") }
                     OutlinedTextField(name, { name = it }, label = { Text("Imię lub rola, np. Babcia") }, singleLine = true,
                         modifier = Modifier.fillMaxWidth().padding(top = 10.dp))
                     OutlinedTextField(phone, { phone = it }, label = { Text("Telefon (opcjonalnie)") }, singleLine = true,

@@ -1,5 +1,8 @@
 package pl.sportfamily.app.ui.more
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -133,7 +136,7 @@ fun SchoolDaysSection(
         }
         custom.forEach { r ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.EventAvailable, null, tint = Sf.colors.school.main, modifier = Modifier.size(20.dp))
+                SfIcon(AppIcons.dzienWolny, null, tint = Sf.colors.school.main, modifier = Modifier.size(20.dp))
                 Column(Modifier.weight(1f).padding(start = 10.dp)) {
                     Text(r.dates(), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
                     Text(r.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -141,11 +144,11 @@ fun SchoolDaysSection(
                 IconButton(onClick = {
                     var d = r.from
                     while (!d.isAfter(r.to)) { onDelete(d); d = d.plusDays(1) }
-                }) { Icon(Icons.Rounded.DeleteOutline, "Usuń ${r.label}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }) { SfIcon(AppIcons.usun, "Usuń ${r.label}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
         OutlinedButton(onClick = { adding = true }, modifier = Modifier.padding(top = 8.dp)) {
-            Icon(Icons.Rounded.Add, null); Text("  Dodaj dzień wolny")
+            SfIcon(AppIcons.dodaj, null); Text("  Dodaj dzień wolny")
         }
     }
 

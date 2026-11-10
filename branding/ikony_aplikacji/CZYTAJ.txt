@@ -1,0 +1,10 @@
+SportFamily, brakujące ikony (45 plików na wersję)
+
+svg/jasne-tlo       kontur granatowy #141B3D, kropka #FF6A1F
+svg/granatowe-tlo   kontur biały #FFFFFF, kropka #FF6A1F, na tło #141B3D
+png/                te same ikony 96 px, przezroczyste tło
+ikony.json          Twoja lista z dopisanym polem plik_wybrana przy zakładkach
+
+Nazwy plików są zgodne z listą. Zakładki Dzisiaj, Kalendarz, Dzieci i Zadania mają
+drugi plik z końcówką -wybrana (wersja wypełniona). W wypełnionych zakładkach Kalendarz
+i Zadania wycięcia mają kolor tła: biały w wersji jasnej, granat w wersji granatowej.

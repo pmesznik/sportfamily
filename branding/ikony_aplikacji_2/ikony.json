@@ -1,0 +1,200 @@
+[
+ {
+  "plik": "ui-data.svg",
+  "nazwa": "Data",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Pola daty w formularzu: Dzień, Od, Do, Do kiedy.",
+  "obecnie": "kartka kalendarza (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-notatki.svg",
+  "nazwa": "Notatki",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Notatki w szczegółach wydarzenia.",
+  "obecnie": "linie tekstu (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-zmiana-terminu.svg",
+  "nazwa": "Zmiana na ten dzień",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Oznaczenie terminu zmienionego tylko na jeden dzień (inna osoba lub godzina).",
+  "obecnie": "ołówek (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-osoba.svg",
+  "nazwa": "Osoba wożąca",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Lista Kto wozi dzieci w Więcej (Mama, Tata, Babcia).",
+  "obecnie": "postać (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-kontakty.svg",
+  "nazwa": "Kontakty",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Przycisk Wybierz z kontaktów (osoba wożąca, trener).",
+  "obecnie": "książka adresowa (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-aktualizacja.svg",
+  "nazwa": "Aktualizacja",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Pasek Nowa wersja aplikacji.",
+  "obecnie": "telefon ze strzałką (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-uwaga.svg",
+  "nazwa": "Uwaga",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Uwagi przy imporcie planu z Excela.",
+  "obecnie": "kółko z literą i (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "ui-przyklad.svg",
+  "nazwa": "Przykładowy tydzień",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Przycisk Wczytaj przykładowy tydzień (start aplikacji, Więcej).",
+  "obecnie": "plus (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "motyw-auto.svg",
+  "nazwa": "Motyw systemowy",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Przełącznik motywu: jak w telefonie.",
+  "obecnie": "słońce z literą A (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "motyw-jasny.svg",
+  "nazwa": "Motyw jasny",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Przełącznik motywu: jasny.",
+  "obecnie": "słońce (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "motyw-ciemny.svg",
+  "nazwa": "Motyw ciemny",
+  "grupa": "Treść ekranów",
+  "priorytet": "1, warto zrobić",
+  "znaczenie": "Przełącznik motywu: ciemny.",
+  "obecnie": "księżyc (Material)",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-dodaj.svg",
+  "nazwa": "Dodaj",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Przycisk Dodaj (wydarzenie, dziecko, zadanie, rzecz, dzień wolny).",
+  "obecnie": "plus",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-zamknij.svg",
+  "nazwa": "Zamknij",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Zamknięcie formularza, usunięcie pozycji z listy rzeczy.",
+  "obecnie": "krzyżyk",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-usun.svg",
+  "nazwa": "Usuń",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Usunięcie wydarzenia, osoby, dnia wolnego.",
+  "obecnie": "kosz",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-edytuj.svg",
+  "nazwa": "Edytuj",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Edycja wydarzenia.",
+  "obecnie": "ołówek",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-wstecz.svg",
+  "nazwa": "Wstecz",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Powrót z ekranu szczegółów.",
+  "obecnie": "strzałka w lewo",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-poprzedni.svg",
+  "nazwa": "Poprzedni",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Poprzedni tydzień lub miesiąc w kalendarzu.",
+  "obecnie": "znak mniejszości",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-nastepny.svg",
+  "nazwa": "Następny",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Następny tydzień lub miesiąc w kalendarzu.",
+  "obecnie": "znak większości",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "akcja-zaznaczone.svg",
+  "nazwa": "Zaznaczone",
+  "grupa": "Przyciski akcji",
+  "priorytet": "2, opcjonalne",
+  "znaczenie": "Ptaszek: spakowana rzecz, wybrany kolor dziecka.",
+  "obecnie": "ptaszek",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "powiad-wyjazd.svg",
+  "nazwa": "Powiadomienie: wyjazd i odbiór",
+  "grupa": "Powiadomienia",
+  "priorytet": "3, propozycja",
+  "znaczenie": "Przypomnienie o wyjeździe na zajęcia i po dziecko.",
+  "obecnie": "S z logo",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "powiad-pakowanie.svg",
+  "nazwa": "Powiadomienie: pakowanie",
+  "grupa": "Powiadomienia",
+  "priorytet": "3, propozycja",
+  "znaczenie": "Wieczorne przypomnienie, co spakować.",
+  "obecnie": "S z logo",
+  "slowa_kluczowe": []
+ },
+ {
+  "plik": "powiad-termin.svg",
+  "nazwa": "Powiadomienie: termin",
+  "grupa": "Powiadomienia",
+  "priorytet": "3, propozycja",
+  "znaczenie": "Zajęcia bez dojazdu, sprawdzian, wydarzenie całodniowe.",
+  "obecnie": "S z logo",
+  "slowa_kluczowe": []
+ }
+]

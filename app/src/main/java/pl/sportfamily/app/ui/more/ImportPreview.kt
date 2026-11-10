@@ -1,5 +1,9 @@
 package pl.sportfamily.app.ui.more
 
+import pl.sportfamily.app.ui.components.AppIcons
+
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -85,7 +89,7 @@ fun ImportPreviewDialog(
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
                 Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onDismiss) { Icon(Icons.Rounded.Close, "Anuluj") }
+                    IconButton(onClick = onDismiss) { SfIcon(AppIcons.zamknij, "Anuluj") }
                     Text("Import planu", style = MaterialTheme.typography.titleLarge)
                 }
                 Column(
@@ -118,7 +122,7 @@ fun ImportPreviewDialog(
                                     FilterChip(
                                         selected = cats[i] == c, onClick = { cats[i] = c },
                                         label = { Text(categoryLabel(c)) },
-                                        leadingIcon = { Icon(categoryIcon(c), null, tint = Sf.colors.of(c).main, modifier = Modifier.size(18.dp)) },
+                                        leadingIcon = { SfIcon(categoryIcon(c), null, tint = Sf.colors.of(c).main, modifier = Modifier.size(18.dp)) },
                                     )
                                 }
                             }
@@ -191,7 +195,7 @@ fun ImportPreviewDialog(
                         SectionHeader("Pominięte")
                         plan.warnings.forEach {
                             Row(Modifier.padding(vertical = 3.dp)) {
-                                Icon(Icons.Rounded.Info, null, tint = Sf.colors.important.main, modifier = Modifier.size(18.dp))
+                                SfIcon(AppIcons.uwaga, null, tint = Sf.colors.important.main, modifier = Modifier.size(18.dp))
                                 Text(it, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(start = 8.dp))
                             }
                         }

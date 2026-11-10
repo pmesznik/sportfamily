@@ -1,5 +1,8 @@
 package pl.sportfamily.app.update
 
+import pl.sportfamily.app.ui.components.AppIcons
+import pl.sportfamily.app.ui.components.SfIcon
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -59,7 +62,7 @@ fun UpdateBanner() {
                 .padding(14.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Rounded.SystemUpdate, null, tint = tone.onContainer)
+                SfIcon(AppIcons.aktualizacja, null, tint = tone.onContainer)
                 Column(Modifier.weight(1f).padding(start = 12.dp)) {
                     Text("Nowa wersja ${u.versionName}", style = MaterialTheme.typography.labelLarge, color = tone.onContainer)
                     Text(error ?: u.notes.ifBlank { "Gotowa do instalacji" }, style = MaterialTheme.typography.bodySmall, color = tone.onContainer)
