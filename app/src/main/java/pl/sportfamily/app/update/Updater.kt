@@ -26,6 +26,20 @@ data class UpdateInfo(val versionCode: Int, val versionName: String, val apkUrl:
 object Updater {
     val enabled: Boolean get() = BuildConfig.UPDATE_MANIFEST_URL.isNotBlank()
 
+    /** Wspólny stan: pasek na ekranie i ręczne sprawdzenie w "Więcej" widzą to samo. */
+    val available = kotlinx.coroutines.flow.MutableStateFlow<UpdateInfo?>(null)
+    private var lastCheck = 0L
+
+    /** Sprawdza, jeśli od ostatniego razu minęła godzina (albo zawsze, gdy force). Wynik trafia do [available]. */
+    suspend fun refresh(force: Boolean = false): UpdateInfo? {
+        val now = System.currentTimeMillis()
+        if (!force && now - lastCheck < 3600_000L) return available.value
+        lastCheck = now
+        val info = check()
+        available.value = info
+        return info
+    }
+
     suspend fun check(): UpdateInfo? = withContext(Dispatchers.IO) {
         if (!enabled) return@withContext null
         runCatching {
