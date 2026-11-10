@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ChecklistItem::class, ChecklistCheck::class, TaskEntity::class, SchoolDayOff::class,
         EventDayRule::class, OccurrenceOverride::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "sportfamily.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .build()
 
         /** v0.8: znacznik importu planu. Dane użytkownika zostają. */
@@ -33,6 +33,14 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         /** v0.11: godziny i osoby osobno dla dni tygodnia oraz zmiany pojedynczych terminów. */
+        /** v0.12: pole "Zabierz też" w wydarzeniu i w zmianie pojedynczego terminu. */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE events ADD COLUMN alsoTake TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE occurrence_overrides ADD COLUMN alsoTake TEXT")
+            }
+        }
+
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `event_day_rules` (`eventId` INTEGER NOT NULL, `weekday` INTEGER NOT NULL, `startMinute` INTEGER, `endMinute` INTEGER, `dropOffPersonId` INTEGER, `pickUpPersonId` INTEGER, PRIMARY KEY(`eventId`, `weekday`), FOREIGN KEY(`eventId`) REFERENCES `events`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )")

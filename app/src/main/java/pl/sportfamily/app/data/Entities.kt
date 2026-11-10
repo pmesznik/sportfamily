@@ -54,6 +54,8 @@ data class EventEntity(
     val dropOffPersonId: Long? = null,
     val pickUpPersonId: Long? = null,
     val notes: String = "",
+    /** Kogo jeszcze zabrać (np. kolega ze szkoły), wolny tekst. */
+    @ColumnInfo(defaultValue = "") val alsoTake: String = "",
     /** Znacznik wydarzeń z importu planu (ponowny import zastępuje je zamiast dublować). */
     val importTag: String? = null,
 )
@@ -152,4 +154,6 @@ data class OccurrenceOverride(
     val endMinute: Int? = null,
     val dropOffPersonId: Long? = null,
     val pickUpPersonId: Long? = null,
+    /** Kogo zabrać tylko tego dnia; null = jak w serii, pusty tekst = nikogo. */
+    val alsoTake: String? = null,
 )

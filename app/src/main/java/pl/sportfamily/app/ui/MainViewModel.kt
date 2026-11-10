@@ -119,9 +119,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { repo.saveEvent(event, childIds, checklist, rules) }
 
     /** Zmiana osób tylko dla jednego terminu. Obie wartości null = usuń zmianę. */
-    fun setOverride(eventId: Long, day: LocalDate, dropOff: Long?, pickUp: Long?) = viewModelScope.launch {
-        if (dropOff == null && pickUp == null) repo.clearOverride(eventId, day)
-        else repo.setOverride(pl.sportfamily.app.data.OccurrenceOverride(eventId, day.toEpochDay(), dropOffPersonId = dropOff, pickUpPersonId = pickUp))
+    fun setOverride(eventId: Long, day: LocalDate, dropOff: Long?, pickUp: Long?, start: Int? = null, end: Int? = null, alsoTake: String? = null) = viewModelScope.launch {
+        if (dropOff == null && pickUp == null && start == null && end == null && alsoTake == null) repo.clearOverride(eventId, day)
+        else repo.setOverride(pl.sportfamily.app.data.OccurrenceOverride(eventId, day.toEpochDay(), start, end, dropOff, pickUp, alsoTake))
     }
 }
 

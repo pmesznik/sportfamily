@@ -169,3 +169,17 @@ fun DayRuleDialog(
         )
     }
 }
+
+/** Okno wyboru godziny (24 h); zwraca minuty od północy. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MinutePickerDialog(title: String, minutes: Int, onDismiss: () -> Unit, onPick: (Int) -> Unit) {
+    val state = rememberTimePickerState(initialHour = minutes / 60, initialMinute = minutes % 60, is24Hour = true)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { TimePicker(state) },
+        confirmButton = { TextButton(onClick = { onPick(state.hour * 60 + state.minute) }) { Text("OK") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+    )
+}

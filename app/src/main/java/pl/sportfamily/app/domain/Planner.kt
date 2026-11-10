@@ -53,6 +53,8 @@ data class Occurrence(
     val changedThisDay: Boolean = false,
     /** Ten dzień tygodnia ma w serii własne ustawienia. */
     val dayRule: pl.sportfamily.app.data.EventDayRule? = null,
+    /** Kogo jeszcze zabrać w tym terminie (termin, potem seria). */
+    val alsoTake: String = "",
 ) {
     val key: String get() = "${event.id}_${date.toEpochDay()}"
     val allDay: Boolean get() = event.allDay
@@ -65,13 +67,13 @@ data class Occurrence(
 
     val checklistDone: Int get() = checklist.count { it.id in checkedIds }
     val needsTransport: Boolean
-        get() = event.travelMinutes > 0 && !event.allDay && event.category != Category.SCHOOL
+        get() = (event.travelMinutes > 0 || event.placeName.isNotBlank()) && !event.allDay && event.category != Category.SCHOOL
 
     fun overlapsDay(day: LocalDate): Boolean =
         !start.toLocalDate().isAfter(day) && !end.toLocalDate().isBefore(day)
 }
 
-enum class ConflictKind { NO_DRIVER, CHILD_OVERLAP, DRIVER_OVERLAP }
+enum class ConflictKind { NO_DRIVER, NO_PICKUP, CHILD_OVERLAP, DRIVER_OVERLAP }
 
 data class Conflict(val kind: ConflictKind, val a: Occurrence, val b: Occurrence? = null)
 
@@ -138,7 +140,13 @@ object Planner {
                     start = date.atTime(minuteToTime(sMin))
                     val endDate = date.plusDays(e.endDay - e.startDay)
                     val rawEnd = endDate.atTime(minuteToTime(eMin))
-                    end = if (rawEnd.isAfter(start)) rawEnd else start.plusHours(1)
+                    // Po północy (np. 23:00-01:00): koniec następnego dnia. Inaczej błędny koniec = start + 1 h.
+                    val overnight = !rawEnd.isAfter(start) && sMin >= 20 * 60 && eMin <= 6 * 60 && eMin < sMin
+                    end = when {
+                        rawEnd.isAfter(start) -> rawEnd
+                        overnight -> rawEnd.plusDays(1)
+                        else -> start.plusHours(1)
+                    }
                 }
                 Occurrence(
                     event = e,
@@ -153,6 +161,7 @@ object Planner {
                     checkedIds = checksByDay[date.toEpochDay()].orEmpty().toSet(),
                     changedThisDay = ov != null,
                     dayRule = rule,
+                    alsoTake = (ov?.alsoTake ?: e.alsoTake).trim(),
                 )
             }
         }.sortedWith(compareBy<Occurrence>({ !it.allDay }, { it.start }, { it.event.title }))
@@ -165,6 +174,7 @@ object Planner {
     fun conflicts(occ: List<Occurrence>): List<Conflict> {
         val out = ArrayList<Conflict>()
         occ.filter { it.needsTransport && it.dropOff == null }.forEach { out += Conflict(ConflictKind.NO_DRIVER, it) }
+        occ.filter { it.needsTransport && it.pickUp == null }.forEach { out += Conflict(ConflictKind.NO_PICKUP, it) }
 
         val timed = occ.filter { !it.allDay && !it.multiDay }
         for (i in timed.indices) for (j in i + 1 until timed.size) {
@@ -188,9 +198,22 @@ object Planner {
                 overlaps(a.end, a.end.plusMinutes(a.event.travelMinutes.toLong()), b.end, b.end.plusMinutes(b.event.travelMinutes.toLong()))
             ) {
                 out += Conflict(ConflictKind.DRIVER_OVERLAP, a, b)
+                continue
+            }
+            // Odbiór jednego dziecka kontra zawóz drugiego przez tę samą osobę (w obie strony).
+            if (a.event.placeName != b.event.placeName && (pickThenDrop(a, b) || pickThenDrop(b, a))) {
+                out += Conflict(ConflictKind.DRIVER_OVERLAP, a, b)
             }
         }
         return out.sortedBy { it.a.start }
+    }
+
+    /** [pick] odbiera osoba, która w tym samym czasie ma zawieźć [drop]. */
+    private fun pickThenDrop(pick: Occurrence, drop: Occurrence): Boolean {
+        val who = pick.pickUp ?: return false
+        if (who.id != drop.dropOff?.id) return false
+        val dep = drop.departure ?: return false
+        return overlaps(pick.end, pick.end.plusMinutes(pick.event.travelMinutes.toLong()), dep, drop.start)
     }
 
     private fun overlaps(s1: LocalDateTime, e1: LocalDateTime, s2: LocalDateTime, e2: LocalDateTime) =

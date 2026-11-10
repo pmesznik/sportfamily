@@ -65,6 +65,7 @@ import pl.sportfamily.app.ui.components.schoolKindLabel
 import pl.sportfamily.app.ui.hm
 import pl.sportfamily.app.ui.longLabel
 import pl.sportfamily.app.ui.shortLabel
+import pl.sportfamily.app.ui.minutesLabel
 import pl.sportfamily.app.ui.theme.Sf
 import pl.sportfamily.app.ui.today.openNavigation
 import java.time.LocalDate
@@ -80,7 +81,7 @@ fun EventDetailScreen(
     onToggleCheck: (Long, LocalDate) -> Unit,
     onCancelOccurrence: () -> Unit,
     onDelete: () -> Unit,
-    onSetOverride: (Long?, Long?) -> Unit = { _, _ -> },
+    onSetOverride: (Long?, Long?, Int?, Int?, String?) -> Unit = { _, _, _, _, _ -> },
 ) {
     val occ: Occurrence? = remember(data, eventId, day) {
         Planner.occurrences(data.copy(events = data.events.filter { it.id == eventId }), day, day).firstOrNull()
@@ -159,6 +160,7 @@ fun EventDetailScreen(
                         if (occ.changedThisDay) ToneChip("Zmiana tylko na ten dzień", sf.important, Icons.Rounded.Edit)
                         TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
                         TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
+                        if (occ.alsoTake.isNotBlank()) Detail(Icons.Rounded.Edit, "Zabierz też: ${occ.alsoTake}", null)
                         if (repeating && data.persons.isNotEmpty()) {
                             OutlinedButton(onClick = { changingDay = true }, shape = RoundedCornerShape(12.dp)) {
                                 Text(if (occ.changedThisDay) "Zmień lub cofnij zmianę na ten dzień" else "Zmień na ten dzień")
@@ -208,27 +210,60 @@ fun EventDetailScreen(
         val ov = data.overrides.firstOrNull { it.eventId == occ.event.id && it.day == day.toEpochDay() }
         var drop by remember { mutableStateOf(ov?.dropOffPersonId) }
         var pick by remember { mutableStateOf(ov?.pickUpPersonId) }
+        val baseStart = occ.dayRule?.startMinute ?: occ.event.startMinute
+        val baseEnd = occ.dayRule?.endMinute ?: occ.event.endMinute
+        var s by remember { mutableStateOf(ov?.startMinute) }
+        var en by remember { mutableStateOf(ov?.endMinute) }
+        var picking by remember { mutableStateOf<String?>(null) }
+        var also by remember { mutableStateOf(ov?.alsoTake ?: occ.event.alsoTake) }
+        val effS = s ?: baseStart
+        val effE = en ?: baseEnd
+        val badTime = !occ.allDay && effE <= effS
         val baseDrop = occ.dayRule?.dropOffPersonId ?: occ.event.dropOffPersonId
         val basePick = occ.dayRule?.pickUpPersonId ?: occ.event.pickUpPersonId
         AlertDialog(
             onDismissRequest = { changingDay = false },
-            title = { Text("Kto jedzie ${day.longLabel().lowercase()}") },
+            title = { Text("Zmiana: ${day.longLabel().lowercase()}") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (!occ.allDay) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { picking = "s" }, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) { Text("Od ${minutesLabel(effS)}") }
+                            OutlinedButton(onClick = { picking = "e" }, modifier = Modifier.weight(1f).heightIn(min = 48.dp), shape = RoundedCornerShape(12.dp)) { Text("Do ${minutesLabel(effE)}") }
+                        }
+                        if (badTime) Text("Koniec musi być po początku", color = sf.error.main, style = MaterialTheme.typography.bodySmall)
+                    }
                     PersonChoice("Zawozi", drop, data.persons, "jak w serii (${personName(data.persons, null, baseDrop)})") { drop = it }
                     PersonChoice("Odbiera", pick, data.persons, "jak w serii (${personName(data.persons, null, basePick)})") { pick = it }
+                    androidx.compose.material3.OutlinedTextField(also, { also = it }, label = { Text("Zabierz też (tylko ten dzień)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     Text("Zmiana dotyczy tylko tego terminu. Pozostałe terminy serii zostają bez zmian.",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
-            confirmButton = { TextButton(onClick = { changingDay = false; onSetOverride(drop, pick) }) { Text("Zapisz") } },
+            confirmButton = {
+                TextButton(enabled = !badTime, onClick = {
+                    changingDay = false
+                    onSetOverride(drop, pick, s?.takeIf { it != baseStart }, en?.takeIf { it != baseEnd }, also.trim().takeIf { it != occ.event.alsoTake.trim() })
+                }) { Text("Zapisz") }
+            },
             dismissButton = {
                 Row {
-                    if (ov != null) TextButton(onClick = { changingDay = false; onSetOverride(null, null) }) { Text("Cofnij zmianę") }
+                    if (ov != null) TextButton(onClick = { changingDay = false; onSetOverride(null, null, null, null, null) }) { Text("Cofnij zmianę") }
                     TextButton(onClick = { changingDay = false }) { Text("Anuluj") }
                 }
             },
         )
+        picking?.let { which ->
+            MinutePickerDialog(
+                title = if (which == "s") "Początek" else "Koniec",
+                minutes = if (which == "s") effS else effE,
+                onDismiss = { picking = null },
+                onPick = { v ->
+                    if (which == "s") { val len = (effE - effS).coerceAtLeast(30); s = v; en = (v + len).coerceAtMost(23 * 60 + 59) } else en = v
+                    picking = null
+                },
+            )
+        }
     }
     if (confirmDelete && occ != null) {
         AlertDialog(

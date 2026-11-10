@@ -248,7 +248,7 @@ private fun App(vm: MainViewModel = viewModel()) {
                     onToggleCheck = { item, dd -> vm.toggleCheck(item, dd) },
                     onCancelOccurrence = { vm.cancelOccurrence(id, day); nav.popBackStack() },
                     onDelete = { vm.deleteEvent(id); nav.popBackStack() },
-                    onSetOverride = { d, p -> vm.setOverride(id, day, d, p) },
+                    onSetOverride = { d, p, s, e, a -> vm.setOverride(id, day, d, p, s, e, a) },
                 )
             }
             composable(

@@ -204,6 +204,7 @@ private fun ConflictBanner(c: Conflict, today: LocalDate, onClick: () -> Unit) {
     val who = c.a.children.joinToString { it.name }.ifEmpty { c.a.event.title }
     val (title, sub) = when (c.kind) {
         ConflictKind.NO_DRIVER -> "$day: nikt nie wiezie ($who)" to "${c.a.event.title} ${c.a.start.hm()}, brak kierowcy"
+        ConflictKind.NO_PICKUP -> "$day: nikt nie odbiera ($who)" to "${c.a.event.title} ${c.a.end.hm()}, brak osoby do odbioru"
         ConflictKind.CHILD_OVERLAP -> "$day: $who w dwóch miejscach" to "${c.a.event.title} i ${c.b?.event?.title} nakładają się"
         ConflictKind.DRIVER_OVERLAP -> "$day: ${c.a.dropOff?.name ?: c.a.pickUp?.name} ma dwa kursy" to "${c.a.event.title} ${c.a.start.hm()} i ${c.b?.event?.title} ${c.b?.start?.hm()}"
     }
