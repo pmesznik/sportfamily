@@ -118,17 +118,14 @@ fun TodayScreen(
                     Text(today.longLabel(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(greeting(now.toLocalTime()), style = MaterialTheme.typography.headlineMedium)
                 }
-                Image(painterResource(Sf.logoSymbol), contentDescription = "SportFamily", modifier = Modifier.size(40.dp))
+                Image(painterResource(Sf.logoSymbol), contentDescription = "SportFamily Kalendarz", modifier = Modifier.size(40.dp))
             }
             VSpace(8.dp)
         }
 
         if (data.children.isEmpty() && data.events.isEmpty()) {
             item {
-                Image(
-                    painterResource(Sf.logoHorizontal), contentDescription = "SportFamily",
-                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp).height(56.dp),
-                )
+                pl.sportfamily.app.ui.components.BrandLockup(Modifier.fillMaxWidth().padding(top = 24.dp), logoHeight = 56.dp)
                 EmptyState(
                     icon = Icons.Rounded.CalendarMonth,
                     title = "Zacznijmy od dzieci",

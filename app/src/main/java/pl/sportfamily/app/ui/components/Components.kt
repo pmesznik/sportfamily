@@ -289,6 +289,25 @@ fun eventIcon(e: EventEntity): ImageVector {
     }
 }
 
+/** Logo z napisem i podpisem "Kalendarz rodzinny" (pełna nazwa aplikacji). */
+@Composable
+fun BrandLockup(modifier: Modifier = Modifier, logoHeight: Dp = 52.dp, centered: Boolean = true) {
+    val align = if (centered) Alignment.CenterHorizontally else Alignment.Start
+    Column(modifier, horizontalAlignment = align) {
+        androidx.compose.foundation.Image(
+            androidx.compose.ui.res.painterResource(Sf.logoHorizontal),
+            contentDescription = androidx.compose.ui.res.stringResource(pl.sportfamily.app.R.string.app_name),
+            modifier = Modifier.height(logoHeight),
+        )
+        Text(
+            androidx.compose.ui.res.stringResource(pl.sportfamily.app.R.string.app_tagline).uppercase(),
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 2.5.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp, start = if (centered) 0.dp else (logoHeight.value * 0.36f).dp),
+        )
+    }
+}
+
 @Composable
 fun HSpace(w: Dp) = Spacer(Modifier.width(w))
 

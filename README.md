@@ -1,6 +1,6 @@
-# SportFamily
+# SportFamily Kalendarz
 
-Rodzinny kalendarz rodzica młodego sportowca na Androida. Jedno miejsce na treningi, szkołę, zajęcia dodatkowe, dojazdy i rzeczy do spakowania.
+Kalendarz rodzinny dla rodziców młodych sportowców, na Androida. Jedno miejsce na treningi, szkołę, zajęcia dodatkowe, dojazdy i rzeczy do spakowania.
 
 - Ekran **Dzisiaj**: najbliższe wydarzenie, godzina wyjazdu, kto wiezie, co zabrać, oś dnia.
 - **Kalendarz** tygodniowy i miesięczny z filtrami dzieci i kategorii, wykrywanie konfliktów.

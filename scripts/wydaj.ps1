@@ -44,7 +44,7 @@ if (-not $NoPublish) {
     try { gh release view $tag --repo $repo *> $null; if ($LASTEXITCODE -ne 0) { $exists = $false } } catch { $exists = $false }
     if ($exists) { throw "Wydanie $tag już istnieje. Zwiększ versionName i versionCode." }
     $notesText = if ($Notes) { $Notes } else { "Wersja $name" }
-    gh release create $tag $apk $json --repo $repo --title "SportFamily $name" --notes $notesText
+    gh release create $tag $apk $json --repo $repo --title "SportFamily Kalendarz $name" --notes $notesText
     if ($LASTEXITCODE -ne 0) { throw "Publikacja na GitHub nie powiodła się" }
     Write-Output "Opublikowano: https://github.com/$repo/releases/tag/$tag"
 }
