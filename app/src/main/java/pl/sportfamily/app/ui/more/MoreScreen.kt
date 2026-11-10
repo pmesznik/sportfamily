@@ -1,0 +1,127 @@
+package pl.sportfamily.app.ui.more
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import pl.sportfamily.app.data.Person
+import pl.sportfamily.app.domain.PlannerData
+import pl.sportfamily.app.ui.components.IconBadge
+import pl.sportfamily.app.ui.components.SectionHeader
+import pl.sportfamily.app.ui.components.SfCard
+import pl.sportfamily.app.ui.theme.Sf
+
+@Composable
+fun MoreScreen(
+    data: PlannerData,
+    contentPadding: PaddingValues,
+    onSavePerson: (Person) -> Unit,
+    onDeletePerson: (Person) -> Unit,
+    onSeedDemo: () -> Unit,
+) {
+    var editing by remember { mutableStateOf<Person?>(null) }
+    var confirmDemo by remember { mutableStateOf(false) }
+    Column(
+        Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(contentPadding)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text("Więcej", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(vertical = 8.dp))
+
+        SectionHeader("Kto wozi dzieci", "Dodaj") { editing = Person(name = "") }
+        SfCard(Modifier.fillMaxWidth(), padding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
+            if (data.persons.isEmpty()) Text("Brak osób", Modifier.padding(8.dp))
+            data.persons.forEach { p ->
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+                    IconBadge(Icons.Rounded.Person, Sf.colors.sport)
+                    TextButton(onClick = { editing = p }, modifier = Modifier.weight(1f)) {
+                        Text(p.name, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.fillMaxWidth())
+                    }
+                    IconButton(onClick = { onDeletePerson(p) }) { Icon(Icons.Rounded.DeleteOutline, "Usuń ${p.name}", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+            }
+        }
+        Text(
+            "Te osoby wybierasz przy wydarzeniu jako zawożące i odbierające. Aplikacja ostrzeże, gdy ktoś ma dwa kursy naraz albo nikt nie wiezie.",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp, start = 4.dp),
+        )
+
+        SectionHeader("Dane")
+        SfCard(Modifier.fillMaxWidth()) {
+            Text(
+                "Wszystkie dane są zapisane tylko na tym telefonie. Aplikacja łączy się z internetem wyłącznie po to, żeby sprawdzić, czy jest nowa wersja.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            OutlinedButton(onClick = { confirmDemo = true }, modifier = Modifier.padding(top = 12.dp)) {
+                Icon(Icons.Rounded.Add, null); Text("  Wczytaj przykładowy tydzień")
+            }
+        }
+
+        SectionHeader("Aktualizacje")
+        val (status, check) = pl.sportfamily.app.update.rememberUpdateCheck()
+        SfCard(Modifier.fillMaxWidth()) {
+            Text("Wersja ${pl.sportfamily.app.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.titleMedium)
+            Text(
+                status ?: "Aplikacja sama sprawdza nowe wersje przy uruchomieniu.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            OutlinedButton(onClick = check, modifier = Modifier.padding(top = 10.dp)) { Text("Sprawdź teraz") }
+        }
+
+        SectionHeader("Wkrótce")
+        SfCard(Modifier.fillMaxWidth()) {
+            listOf(
+                "Przypomnienia: dzień wcześniej, 2 h przed i czas wyjazdu",
+                "Widgety na ekran główny",
+                "Tryb W drodze z mapą",
+                "Plan nauki do sprawdzianów",
+                "Statystyki i wydatki",
+            ).forEach { Text("•  $it", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 3.dp)) }
+        }
+        Text("SportFamily 0.1", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 24.dp, bottom = 80.dp))
+    }
+
+    editing?.let { p ->
+        var name by remember(p) { mutableStateOf(p.name) }
+        AlertDialog(
+            onDismissRequest = { editing = null },
+            title = { Text(if (p.id == 0L) "Nowa osoba" else "Zmień nazwę") },
+            text = { OutlinedTextField(name, { name = it }, label = { Text("Imię lub rola, np. Babcia") }, singleLine = true) },
+            confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onSavePerson(p.copy(name = name.trim())); editing = null }) { Text("Zapisz") } },
+            dismissButton = { TextButton(onClick = { editing = null }) { Text("Anuluj") } },
+        )
+    }
+    if (confirmDemo) {
+        AlertDialog(
+            onDismissRequest = { confirmDemo = false },
+            title = { Text("Wczytać przykładowe dane?") },
+            text = { Text("Dodam dwoje przykładowych dzieci (Zosia, Kuba) z typowym tygodniem. Możesz je potem usunąć w zakładce Dzieci.") },
+            confirmButton = { TextButton(onClick = { confirmDemo = false; onSeedDemo() }) { Text("Wczytaj") } },
+            dismissButton = { TextButton(onClick = { confirmDemo = false }) { Text("Anuluj") } },
+        )
+    }
+}
