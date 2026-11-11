@@ -55,6 +55,8 @@ data class Occurrence(
     val dayRule: pl.sportfamily.app.data.EventDayRule? = null,
     /** Kogo jeszcze zabrać w tym terminie (termin, potem seria). */
     val alsoTake: String = "",
+    /** Transport nie dotyczy tego terminu (seria albo zmiana na ten dzień). */
+    val noTransport: Boolean = false,
     /** Dziecko jest już na miejscu po poprzednich zajęciach w tym samym miejscu (nazwa tamtych zajęć). */
     val stayFrom: String? = null,
     /** Dziecko zostaje na miejscu na kolejne zajęcia w tym samym miejscu (nazwa tamtych zajęć). */
@@ -66,7 +68,7 @@ data class Occurrence(
 
     /** Godzina wyjazdu: start minus dojazd minus zapas. Brak, gdy dojazd nieustawiony. */
     val departure: LocalDateTime?
-        get() = if (event.travelMinutes > 0 && !event.allDay && stayFrom == null)
+        get() = if (event.travelMinutes > 0 && !event.allDay && stayFrom == null && !noTransport)
             start.minusMinutes((event.travelMinutes + event.bufferMinutes).toLong()) else null
 
     val checklistDone: Int get() = checklist.count { it.id in checkedIds }
@@ -74,7 +76,7 @@ data class Occurrence(
     val needsDropOff: Boolean get() = needsTransport && stayFrom == null
     val needsPickUp: Boolean get() = needsTransport && stayFor == null
     val needsTransport: Boolean
-        get() = (event.travelMinutes > 0 || event.placeName.isNotBlank()) && !event.allDay && event.category != Category.SCHOOL
+        get() = !noTransport && (event.travelMinutes > 0 || event.placeName.isNotBlank()) && !event.allDay && event.category != Category.SCHOOL
 
     fun overlapsDay(day: LocalDate): Boolean =
         !start.toLocalDate().isAfter(day) && !end.toLocalDate().isBefore(day)
@@ -169,6 +171,7 @@ object Planner {
                     changedThisDay = ov != null,
                     dayRule = rule,
                     alsoTake = (ov?.alsoTake ?: e.alsoTake).trim(),
+                    noTransport = ov?.noTransport ?: e.noTransport,
                 )
             }
         }.sortedWith(compareBy<Occurrence>({ !it.allDay }, { it.start }, { it.event.title }))

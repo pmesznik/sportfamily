@@ -13,10 +13,13 @@ class SportFamilyApp : Application() {
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     lateinit var repository: Repository
         private set
+    lateinit var database: AppDatabase
+        private set
 
     override fun onCreate() {
         super.onCreate()
-        repository = Repository(AppDatabase.create(this).dao())
+        database = AppDatabase.create(this)
+        repository = Repository(database.dao())
         pl.sportfamily.app.ui.theme.SchoolSettings.load(this)
         appScope.launch { repository.ensureDefaults() }
         pl.sportfamily.app.notify.Notifier.createChannels(this)

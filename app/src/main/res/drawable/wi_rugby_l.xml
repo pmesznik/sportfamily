@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z rugby.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <group android:rotation="-45" android:pivotX="12" android:pivotY="12"><path android:pathData="M2.5,12a9.5,5.5 0 1,0 19,0a9.5,5.5 0 1,0 -19,0Z" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" /></group>
+    <path android:pathData="M8.500 15.500l7-7M10 11.500l2.500 2.500" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

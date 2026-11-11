@@ -119,6 +119,8 @@ fun MoreScreen(
 
         RemindersSection(data.persons)
 
+        BackupSection()
+
         ActivityIconsSection()
 
         SectionHeader("Kto wozi dzieci", "Dodaj") { editing = Person(name = "") }
@@ -178,7 +180,7 @@ fun MoreScreen(
         SectionHeader("Dane")
         SfCard(Modifier.fillMaxWidth()) {
             Text(
-                "Wszystkie dane są zapisane tylko na tym telefonie. Aplikacja łączy się z internetem wyłącznie po to, żeby sprawdzić, czy jest nowa wersja.",
+                "Dane są zapisane na tym telefonie. Kopię w chmurze (np. na Dysku Google) ustawisz wyżej, w sekcji Kopia zapasowa. Sama aplikacja łączy się z internetem tylko po to, żeby sprawdzić, czy jest nowa wersja.",
                 style = MaterialTheme.typography.bodyMedium,
             )
             OutlinedButton(onClick = { confirmDemo = true }, modifier = Modifier.padding(top = 12.dp)) {

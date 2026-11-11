@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z wolontariat.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M12 20.500S3.500 15.500 3.500 9.200A4.700 4.700 0 0 1 12 6.600a4.700 4.700 0 0 1 8.500 2.600c0 6.300-8.500 11.300-8.500 11.300z" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

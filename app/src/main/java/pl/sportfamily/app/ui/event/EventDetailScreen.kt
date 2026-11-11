@@ -85,8 +85,13 @@ fun EventDetailScreen(
     onToggleCheck: (Long, LocalDate) -> Unit,
     onCancelOccurrence: () -> Unit,
     onDelete: () -> Unit,
-    onSetOverride: (Long?, Long?, Int?, Int?, String?) -> Unit = { _, _, _, _, _ -> },
+    onSetOverride: (Long?, Long?, Int?, Int?, String?, Boolean?) -> Unit = { _, _, _, _, _, _ -> },
+    /** Nowa kartkówka, sprawdzian, praca domowa lub projekt dla dzieci z bloku Szkoła. */
+    onAddSchoolTask: (pl.sportfamily.app.data.EventEntity, List<Long>) -> Unit = { _, _ -> },
+    onOpenOccurrence: (Occurrence) -> Unit = {},
 ) {
+    var lessonMenu by remember { mutableStateOf<pl.sportfamily.app.domain.Lesson?>(null) }
+    val dayOcc = remember(data, day) { Planner.occurrences(data, day, day) }
     val occ: Occurrence? = remember(data, eventId, day) {
         Planner.occurrences(data.copy(events = data.events.filter { it.id == eventId }), day, day).firstOrNull()
     }
@@ -151,13 +156,20 @@ fun EventDetailScreen(
                     if (lessons.isNotEmpty()) {
                         val now = java.time.LocalDateTime.now()
                         Text("Lekcje (${lessons.size})", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        pl.sportfamily.app.ui.components.LessonList(lessons, if (day == now.toLocalDate()) now.hour * 60 + now.minute else null)
+                        val kids = occ.children.map { it.id }.toSet()
+                        pl.sportfamily.app.ui.components.LessonList(
+                            lessons, if (day == now.toLocalDate()) now.hour * 60 + now.minute else null,
+                            badges = { l -> pl.sportfamily.app.domain.SchoolTasks.forLesson(l, day, kids, dayOcc).mapNotNull { it.event.schoolKind }.map { pl.sportfamily.app.domain.SchoolTasks.label(it) } },
+                            onLessonClick = { lessonMenu = it },
+                        )
+                        Text("Stuknij przedmiot, żeby dodać kartkówkę, sprawdzian, pracę domową albo projekt.",
+                            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else if (e.notes.isNotBlank()) Detail(AppIcons.notatki, e.notes, null)
                 }
             }
 
             val repeating = occ.event.repeatDays != 0
-            if (occ.needsTransport || occ.dropOff != null || occ.pickUp != null || (repeating && data.persons.isNotEmpty())) {
+            if (occ.needsTransport || occ.noTransport || occ.dropOff != null || occ.pickUp != null || (repeating && data.persons.isNotEmpty())) {
                 SectionHeader("Transport")
                 SfCard(Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -166,8 +178,14 @@ fun EventDetailScreen(
                             Detail(AppIcons.wyjazd, "To samo miejsce: ${occ.event.placeName}",
                                 listOfNotNull(occ.stayFrom?.let { "Dziecko jest już na miejscu po: $it, bez dojazdu" }, occ.stayFor?.let { "Zostaje na miejscu na: $it, bez odbioru" }).joinToString(". "))
                         }
-                        if (occ.stayFrom == null) TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" })
-                        if (occ.stayFor == null) TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}")
+                        if (occ.noTransport) {
+                            Detail(AppIcons.transport, "Transport nie dotyczy",
+                                if (occ.changedThisDay && !occ.event.noTransport) "Tylko w tym dniu: bez wyjazdu i przypomnień o przewozie."
+                                else "Bez wyjazdu, przypomnień i ostrzeżeń o przewozie.")
+                        } else {
+                            if (occ.stayFrom == null) TransportRow("Tam", occ.dropOff, occ.departure?.hm()?.let { "wyjazd $it" }, warn = occ.needsDropOff)
+                            if (occ.stayFor == null) TransportRow("Powrót", occ.pickUp, "odbiór ${occ.end.hm()}", warn = occ.needsPickUp)
+                        }
                         if (occ.alsoTake.isNotBlank()) Detail(AppIcons.zabierzTez, "Zabierz też: ${occ.alsoTake}", null)
                         if (repeating && data.persons.isNotEmpty()) {
                             OutlinedButton(onClick = { changingDay = true }, shape = RoundedCornerShape(12.dp)) {
@@ -230,6 +248,20 @@ fun EventDetailScreen(
         }
     }
 
+    val lm = lessonMenu
+    if (lm != null && occ != null) {
+        val kids = occ.children.map { it.id }
+        LessonTaskDialog(
+            lesson = lm, day = day,
+            existing = pl.sportfamily.app.domain.SchoolTasks.forLesson(lm, day, kids.toSet(), dayOcc),
+            onOpen = { lessonMenu = null; onOpenOccurrence(it) },
+            onDismiss = { lessonMenu = null },
+            onSave = { kind, scope ->
+                lessonMenu = null
+                onAddSchoolTask(pl.sportfamily.app.domain.SchoolTasks.newTask(kind, lm, day, scope), kids)
+            },
+        )
+    }
     if (changingDay && occ != null) {
         val ov = data.overrides.firstOrNull { it.eventId == occ.event.id && it.day == day.toEpochDay() }
         var drop by remember { mutableStateOf(ov?.dropOffPersonId) }
@@ -240,6 +272,7 @@ fun EventDetailScreen(
         var en by remember { mutableStateOf(ov?.endMinute) }
         var picking by remember { mutableStateOf<String?>(null) }
         var also by remember { mutableStateOf(ov?.alsoTake ?: occ.event.alsoTake) }
+        var none by remember { mutableStateOf(ov?.noTransport ?: occ.event.noTransport) }
         val effS = s ?: baseStart
         val effE = en ?: baseEnd
         val badTime = !occ.allDay && effE <= effS
@@ -257,8 +290,11 @@ fun EventDetailScreen(
                         }
                         if (badTime) Text("Koniec musi być po początku", color = sf.error.main, style = MaterialTheme.typography.bodySmall)
                     }
-                    PersonChoice("Zawozi", drop, data.persons, "jak w serii (${personName(data.persons, null, baseDrop)})") { drop = it }
-                    PersonChoice("Odbiera", pick, data.persons, "jak w serii (${personName(data.persons, null, basePick)})") { pick = it }
+                    NotApplicableRow(none, if (occ.event.noTransport) "W całej serii transport nie dotyczy" else "Nie trzeba nikogo wozić tego dnia") { none = it }
+                    if (!none) {
+                        PersonChoice("Zawozi", drop, data.persons, "jak w serii (${personName(data.persons, null, baseDrop)})") { drop = it }
+                        PersonChoice("Odbiera", pick, data.persons, "jak w serii (${personName(data.persons, null, basePick)})") { pick = it }
+                    }
                     androidx.compose.material3.OutlinedTextField(also, { also = it }, label = { Text("Zabierz też (tylko ten dzień)") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     Text("Zmiana dotyczy tylko tego terminu. Pozostałe terminy serii zostają bez zmian.",
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -267,12 +303,12 @@ fun EventDetailScreen(
             confirmButton = {
                 TextButton(enabled = !badTime, onClick = {
                     changingDay = false
-                    onSetOverride(drop, pick, s?.takeIf { it != baseStart }, en?.takeIf { it != baseEnd }, also.trim().takeIf { it != occ.event.alsoTake.trim() })
+                    onSetOverride(drop, pick, s?.takeIf { it != baseStart }, en?.takeIf { it != baseEnd }, also.trim().takeIf { it != occ.event.alsoTake.trim() }, none.takeIf { it != occ.event.noTransport })
                 }) { Text("Zapisz") }
             },
             dismissButton = {
                 Row {
-                    if (ov != null) TextButton(onClick = { changingDay = false; onSetOverride(null, null, null, null, null) }) { Text("Cofnij zmianę") }
+                    if (ov != null) TextButton(onClick = { changingDay = false; onSetOverride(null, null, null, null, null, null) }) { Text("Cofnij zmianę") }
                     TextButton(onClick = { changingDay = false }) { Text("Anuluj") }
                 }
             },
@@ -326,16 +362,18 @@ private fun Detail(icon: androidx.compose.ui.graphics.vector.ImageVector, title:
 }
 
 @Composable
-private fun TransportRow(label: String, person: pl.sportfamily.app.data.Person?, sub: String?) {
+/** [warn]: brak osoby to problem (zajęcia z dojazdem). Gdy przewóz nie jest wymagany, np. do szkoły, bez czerwieni. */
+private fun TransportRow(label: String, person: pl.sportfamily.app.data.Person?, sub: String?, warn: Boolean = true) {
     val sf = Sf.colors
     val context = androidx.compose.ui.platform.LocalContext.current
     Row(verticalAlignment = Alignment.CenterVertically) {
-        IconBadge(AppIcons.transport, if (person == null) sf.error else sf.brand)
+        val bad = person == null && warn
+        IconBadge(AppIcons.transport, if (bad) sf.error else sf.brand)
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Text(
-                "$label: " + (person?.name ?: "nikt nie przypisany"),
+                "$label: " + (person?.name ?: if (warn) "nikt nie przypisany" else "nie ustawiono"),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (person == null) sf.error.onContainer else MaterialTheme.colorScheme.onSurface,
+                color = if (bad) sf.error.onContainer else if (person == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
             )
             if (sub != null) Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }

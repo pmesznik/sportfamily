@@ -183,3 +183,15 @@ fun MinutePickerDialog(title: String, minutes: Int, onDismiss: () -> Unit, onPic
         dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
     )
 }
+
+/** Przełącznik "Transport nie dotyczy" w miejscu ustalania przewozu. */
+@Composable
+fun NotApplicableRow(checked: Boolean, hint: String, onChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+        Column(Modifier.weight(1f)) {
+            Text("Transport nie dotyczy", style = MaterialTheme.typography.titleSmall)
+            Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        androidx.compose.material3.Switch(checked = checked, onCheckedChange = onChange)
+    }
+}

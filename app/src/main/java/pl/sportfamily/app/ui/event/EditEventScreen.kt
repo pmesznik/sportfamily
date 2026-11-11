@@ -139,6 +139,7 @@ fun EditEventScreen(
     var pickUp by rememberSaveable { mutableStateOf<Long?>(null) }
     var notes by rememberSaveable { mutableStateOf("") }
     var alsoTake by rememberSaveable { mutableStateOf("") }
+    var noTransport by rememberSaveable { mutableStateOf(false) }
     var coachName by rememberSaveable { mutableStateOf("") }
     var coachPhone by rememberSaveable { mutableStateOf("") }
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -179,7 +180,7 @@ fun EditEventScreen(
                 repeatDays = e.repeatDays; everyWeeks = e.repeatEveryWeeks; repeatUntil = e.repeatUntilDay?.let { LocalDate.ofEpochDay(it) }
                 place = e.placeName; address = e.address
                 travel = if (e.travelMinutes > 0) e.travelMinutes.toString() else ""; buffer = e.bufferMinutes.toString()
-                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; alsoTake = e.alsoTake; coachName = e.coachName; coachPhone = e.coachPhone; importTag = e.importTag
+                dropOff = e.dropOffPersonId; pickUp = e.pickUpPersonId; notes = e.notes; alsoTake = e.alsoTake; noTransport = e.noTransport; coachName = e.coachName; coachPhone = e.coachPhone; importTag = e.importTag
                 checklist.clear(); checklist.addAll(src.checklist)
                 dayRules.clear(); src.dayRules.forEach { dayRules[it.weekday] = it }
             }
@@ -213,6 +214,7 @@ fun EditEventScreen(
             pickUpPersonId = pickUp,
             notes = notes.trim(),
             alsoTake = alsoTake.trim(),
+            noTransport = noTransport,
             coachName = if (category == Category.SPORT) coachName.trim() else "",
             coachPhone = if (category == Category.SPORT) coachPhone.trim() else "",
             importTag = importTag,
@@ -400,7 +402,8 @@ fun EditEventScreen(
 
             if (data.persons.isNotEmpty()) {
                 SectionHeader(if (repeatDays != 0) "Kto wiezie (domyślnie)" else "Kto wiezie")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NotApplicableRow(noTransport, "Zajęcia w domu, online albo dziecko idzie samo") { noTransport = it }
+                if (!noTransport) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PersonDropdown("Zawozi", dropOff, data, Modifier.weight(1f)) { dropOff = it }
                     PersonDropdown("Odbiera", pickUp, data, Modifier.weight(1f)) { pickUp = it }
                 }

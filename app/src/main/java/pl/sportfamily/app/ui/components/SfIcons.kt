@@ -28,7 +28,8 @@ enum class K { L, F, D, C, CS }
 class P(val d: String, val kind: K, val w: Float = 2f, val rot: Float = 0f, val px: Float = 0f, val py: Float = 0f)
 
 /** Ikona SportFamily w trzech warstwach: linia (kolor kategorii), kropka (pomarańczowa), wycięcie (kolor tła). */
-class ActivityIcon(val name: String, val group: String, val keywords: List<String>, private val parts: List<P>) {
+/** [key] to nazwa pliku SVG bez rozszerzenia (np. "tenis"); po nim widżet znajduje swoją wersję ikony. */
+class ActivityIcon(val key: String, val name: String, val group: String, val keywords: List<String>, private val parts: List<P>) {
     val line: ImageVector by lazy { build(K.L, K.F).also { byLine[it] = this } }
     val dot: ImageVector by lazy { build(K.D) }
     val cut: ImageVector? by lazy { if (parts.any { it.kind == K.C || it.kind == K.CS }) build(K.C, K.CS) else null }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.remember
@@ -294,8 +295,13 @@ fun matchActivityIcon(title: String): ActivityIcon? {
         ?: all.firstOrNull { matches(t, specific, it.keywords.filter { k -> k in WeakKeys }) }
 }
 
+/** Ikona bloku lekcji: książka z paczki zajęć. */
+val LessonsIcon: ActivityIcon get() = ActivityIcons.first { it.name == "Czytanie" }
+
 /** Ikona wydarzenia: termin szkolny po rodzaju, inne po nazwie, na końcu ikona kategorii. */
 fun eventSfIcon(e: EventEntity): ActivityIcon {
+    // Lekcje: otwarta książka (jabłko z paczki nie kojarzyło się ze szkołą).
+    if (e.category == Category.SCHOOL && (e.schoolKind == null || e.schoolKind == SchoolKind.LESSONS)) return LessonsIcon
     if (e.category == Category.SCHOOL) return AppIcons.icon(when (e.schoolKind) {
         SchoolKind.TEST -> "szkola-sprawdzian"
         SchoolKind.QUIZ -> "szkola-kartkowka"
@@ -347,7 +353,15 @@ fun VSpace(h: Dp) = Spacer(Modifier.height(h))
  * minione przygaszone, a w przerwie pojawia się wiersz "Przerwa, następna o ...".
  */
 @Composable
-fun LessonList(lessons: List<pl.sportfamily.app.domain.Lesson>, nowMinute: Int?, modifier: Modifier = Modifier) {
+fun LessonList(
+    lessons: List<pl.sportfamily.app.domain.Lesson>,
+    nowMinute: Int?,
+    modifier: Modifier = Modifier,
+    /** Plakietki przy przedmiocie, np. "Kartkówka". */
+    badges: (pl.sportfamily.app.domain.Lesson) -> List<String> = { emptyList() },
+    /** Stuknięcie w lekcję (null = lista tylko do odczytu). */
+    onLessonClick: ((pl.sportfamily.app.domain.Lesson) -> Unit)? = null,
+) {
     val sf = Sf.colors
     val state = nowMinute?.let { pl.sportfamily.app.domain.Lessons.state(lessons, it) }
     fun hm(m: Int) = "%d:%02d".format(m / 60, m % 60)
@@ -372,6 +386,7 @@ fun LessonList(lessons: List<pl.sportfamily.app.domain.Lesson>, nowMinute: Int?,
                     .padding(vertical = 1.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (current) sf.school.container else Color.Transparent)
+                    .then(if (onLessonClick != null) Modifier.clickable(onClickLabel = "Dodaj kartkówkę lub sprawdzian") { onLessonClick(l) }.heightIn(min = 40.dp) else Modifier)
                     .padding(horizontal = 6.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -386,6 +401,7 @@ fun LessonList(lessons: List<pl.sportfamily.app.domain.Lesson>, nowMinute: Int?,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     style = if (current) MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.bodyMedium,
                 )
+                badges(l).forEach { ToneChip(it, sf.important, modifier = Modifier.padding(start = 4.dp)) }
                 if (current) ToneChip("TERAZ", sf.school)
             }
         }

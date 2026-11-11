@@ -13,7 +13,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ChecklistItem::class, ChecklistCheck::class, TaskEntity::class, SchoolDayOff::class,
         EventDayRule::class, OccurrenceOverride::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun create(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "sportfamily.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                 .build()
 
         /** v0.8: znacznik importu planu. Dane użytkownika zostają. */
@@ -33,6 +33,14 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         /** v0.11: godziny i osoby osobno dla dni tygodnia oraz zmiany pojedynczych terminów. */
+        /** v0.14: transport "nie dotyczy" dla serii i pojedynczego terminu. */
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE events ADD COLUMN noTransport INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE occurrence_overrides ADD COLUMN noTransport INTEGER")
+            }
+        }
+
         /** v0.13: trener (imię i telefon) w wydarzeniu. */
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(db: SupportSQLiteDatabase) {

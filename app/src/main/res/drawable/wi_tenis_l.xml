@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z tenis.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <group android:rotation="-45" android:pivotX="9.5" android:pivotY="9.5"><path android:pathData="M4,9.5a5.5,6.8 0 1,0 11,0a5.5,6.8 0 1,0 -11,0Z" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" /></group>
+    <path android:pathData="M13.800 13.800L20.500 20.500M6.500 9.500l5 5M9.500 6.500l5 5" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+</vector>

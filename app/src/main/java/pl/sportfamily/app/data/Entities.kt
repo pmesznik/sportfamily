@@ -56,6 +56,8 @@ data class EventEntity(
     val notes: String = "",
     /** Kogo jeszcze zabrać (np. kolega ze szkoły), wolny tekst. */
     @ColumnInfo(defaultValue = "") val alsoTake: String = "",
+    /** Transport nie dotyczy (zajęcia w domu, online, dziecko idzie samo): bez wyjazdu, przypomnień i ostrzeżeń o kierowcy. */
+    @ColumnInfo(defaultValue = "0") val noTransport: Boolean = false,
     /** Trener (dla treningów): imię i telefon do szybkiego połączenia. */
     @ColumnInfo(defaultValue = "") val coachName: String = "",
     @ColumnInfo(defaultValue = "") val coachPhone: String = "",
@@ -159,4 +161,6 @@ data class OccurrenceOverride(
     val pickUpPersonId: Long? = null,
     /** Kogo zabrać tylko tego dnia; null = jak w serii, pusty tekst = nikogo. */
     val alsoTake: String? = null,
+    /** Transport nie dotyczy tylko tego dnia; null = jak w serii. */
+    val noTransport: Boolean? = null,
 )

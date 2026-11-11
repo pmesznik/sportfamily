@@ -92,6 +92,8 @@ fun RemindersSection(persons: List<Person>) {
             ToggleRow("Pakowanie na jutro", "Wieczorem, gdy lista rzeczy nie jest odhaczona", prefs.packing) { save(prefs.copy(packing = it)) }
             if (prefs.packing) Choices(listOf(19, 20, 21), prefs.packingHour, { "o $it:00" }) { save(prefs.copy(packingHour = it)) }
 
+            ToggleRow("Kartkówki i sprawdziany", "Wieczorem dzień wcześniej (o godzinie pakowania), z zakresem materiału", prefs.schoolTasks) { save(prefs.copy(schoolTasks = it)) }
+
             ToggleRow("Rano: terminy całodniowe", "Sprawdziany, wycieczki, strój galowy", prefs.morning) { save(prefs.copy(morning = it)) }
             if (prefs.morning) Choices(listOf(6, 7, 8), prefs.morningHour, { "o $it:00" }) { save(prefs.copy(morningHour = it)) }
 

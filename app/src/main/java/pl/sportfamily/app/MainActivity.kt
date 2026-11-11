@@ -288,7 +288,9 @@ private fun App(vm: MainViewModel = viewModel()) {
                     onToggleCheck = { item, dd -> vm.toggleCheck(item, dd) },
                     onCancelOccurrence = { vm.cancelOccurrence(id, day); nav.popBackStack() },
                     onDelete = { vm.deleteEvent(id); nav.popBackStack() },
-                    onSetOverride = { d, p, s, e, a -> vm.setOverride(id, day, d, p, s, e, a) },
+                    onSetOverride = { d, p, s, e, a, n -> vm.setOverride(id, day, d, p, s, e, a, n) },
+                    onAddSchoolTask = { e, kids -> vm.saveEvent(e, kids, emptyList()) },
+                    onOpenOccurrence = { o -> nav.navigate("event/${o.event.id}/${o.date.toEpochDay()}") },
                 )
             }
             composable(

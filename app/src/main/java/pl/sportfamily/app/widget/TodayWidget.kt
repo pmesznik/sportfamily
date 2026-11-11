@@ -167,6 +167,18 @@ private fun Content(context: Context, now: LocalDateTime, day: LocalDate, items:
     }
 }
 
+/** Ikona zajęć w widżecie: linia w kolorze tekstu, kropka pomarańczowa (te same ikony co w aplikacji). */
+@Composable
+private fun WIcon(o: Occurrence, size: androidx.compose.ui.unit.Dp, tint: GlanceColor = Fg) {
+    val key = remember(o.event.title, o.event.category, o.event.schoolKind) { pl.sportfamily.app.ui.components.eventSfIcon(o.event).key }
+    val res = WidgetIcons[key] ?: return
+    Box(GlanceModifier.size(size)) {
+        Image(ImageProvider(res.first), contentDescription = null, modifier = GlanceModifier.size(size),
+            colorFilter = androidx.glance.ColorFilter.tint(tint))
+        Image(ImageProvider(res.second), contentDescription = null, modifier = GlanceModifier.size(size))
+    }
+}
+
 @Composable
 private fun Compact(context: Context, now: LocalDateTime, day: LocalDate, items: List<Occurrence>, next: Occurrence?) {
     val today = now.toLocalDate()
@@ -189,7 +201,11 @@ private fun Compact(context: Context, now: LocalDateTime, day: LocalDate, items:
                 when { o.allDay -> "Cały dzień"; running -> "Teraz, do ${o.end.hm()}"; else -> o.start.hm() },
                 style = TextStyle(color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold),
             )
-            Text(o.event.title, style = TextStyle(color = Fg, fontSize = 17.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                WIcon(o, 20.dp)
+                Spacer(GlanceModifier.width(6.dp))
+                Text(o.event.title, style = TextStyle(color = Fg, fontSize = 17.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+            }
             val dep = o.departure
             val sub = when {
                 running && o.stayFor != null -> "Zostaje na: ${o.stayFor}"
@@ -208,7 +224,9 @@ private fun Compact(context: Context, now: LocalDateTime, day: LocalDate, items:
                 rest.forEach { o ->
                     Row(GlanceModifier.fillMaxWidth().padding(vertical = 1.dp).clickable(actionStartActivity(open(context, o))), verticalAlignment = Alignment.CenterVertically) {
                         Box(GlanceModifier.width(3.dp).height(14.dp).cornerRadius(2.dp).background(o.children.firstOrNull()?.let { GlanceColor(Color(it.colorArgb)) } ?: Accent)) {}
-                        Spacer(GlanceModifier.width(6.dp))
+                        Spacer(GlanceModifier.width(5.dp))
+                        WIcon(o, 14.dp)
+                        Spacer(GlanceModifier.width(5.dp))
                         Text((if (o.allDay) "" else o.start.hm() + " ") + o.event.title, style = TextStyle(color = Fg, fontSize = 12.sp), maxLines = 1)
                     }
                 }
@@ -229,11 +247,15 @@ private fun NextCard(context: Context, o: Occurrence, now: LocalDateTime) {
             if (running) "Teraz, do ${o.end.hm()}" else "Następne",
             style = TextStyle(color = Accent, fontSize = 12.sp, fontWeight = FontWeight.Bold),
         )
-        Text(
-            (if (running) "" else o.start.hm() + "  ") + o.event.title,
-            style = TextStyle(color = Fg, fontSize = 17.sp, fontWeight = FontWeight.Bold),
-            maxLines = 1,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            WIcon(o, 20.dp)
+            Spacer(GlanceModifier.width(6.dp))
+            Text(
+                (if (running) "" else o.start.hm() + "  ") + o.event.title,
+                style = TextStyle(color = Fg, fontSize = 17.sp, fontWeight = FontWeight.Bold),
+                maxLines = 1,
+            )
+        }
         val sub = when {
             running && o.stayFor != null -> "Zostaje na: ${o.stayFor}"
             running && o.needsPickUp -> "Odbiór ${o.end.hm()}: " + (o.pickUp?.name ?: "nikt nie odbiera!")
@@ -266,6 +288,8 @@ private fun ItemRow(context: Context, o: Occurrence, now: LocalDateTime) {
                 .background(kid?.let { GlanceColor(Color(it.colorArgb)) } ?: Accent)
         ) {}
         Spacer(GlanceModifier.width(8.dp))
+        WIcon(o, 16.dp)
+        Spacer(GlanceModifier.width(6.dp))
         Text(o.event.title, style = TextStyle(color = Fg, fontSize = 14.sp), maxLines = 1)
     }
 }

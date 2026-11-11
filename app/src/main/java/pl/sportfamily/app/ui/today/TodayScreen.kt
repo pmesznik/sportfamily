@@ -469,6 +469,10 @@ fun TaskRow(t: TaskEntity, data: PlannerData, today: LocalDate, onToggle: () -> 
     val child = data.children.firstOrNull { it.id == t.childId }
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(end = 8.dp)) {
         SquareCheck(t.done, onToggle, t.title)
+        // Ikona po treści zadania (np. "Opłata za basen", "Urodziny Kuby"), inaczej zwykła ikona zadania.
+        val icon = remember(t.title) { pl.sportfamily.app.ui.components.matchActivityIcon(t.title)?.line ?: AppIcons.zadanie }
+        SfIcon(icon, null, Modifier.padding(end = 10.dp).size(20.dp),
+            tint = if (t.done) MaterialTheme.colorScheme.onSurfaceVariant else child?.let { Color(it.colorArgb) } ?: MaterialTheme.colorScheme.onSurfaceVariant)
         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
             Text(
                 t.title, style = MaterialTheme.typography.bodyMedium,

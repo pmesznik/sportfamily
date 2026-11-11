@@ -4,6 +4,8 @@ Użycie:
   python generuj_kotlin.py zajecia   <folder paczki 95>        <wyjście ActivityIcons.kt>
   python generuj_kotlin.py aplikacja <folder paczki brakujące> <wyjście AppIconPack.kt> [nazwa mapy]
   python generuj_kotlin.py drawable  <plik svg>                <wyjście res/drawable/*.xml>   (jednokolorowa, do powiadomień)
+  python generuj_kotlin.py widzet    <folder res/drawable>     <wyjście WidgetIcons.kt> <folder paczki> [<folder paczki> ...]
+                                     (widżet: linia biała do barwienia i osobno pomarańczowa kropka, pliki wi_*)
 
 Bierze wersję svg/jasne-tlo: granat (#141B3D) to linia barwiona kolorem kategorii,
 pomarańcz (#FF6A1F) to kropka, biel (#FFFFFF) to wycięcie w kolorze tła.
@@ -85,6 +87,50 @@ def kt_parts(parts, indent):
     return '\n'.join(rows)
 
 
+def vector_xml(parts, name, dot):
+    rows = []
+    for d, kind, w, rot in parts:
+        if kind in ('C', 'CS'): continue
+        if dot != (kind == 'D'): continue
+        if kind == 'L':
+            attr = f'android:strokeColor="#FFFFFFFF" android:strokeWidth="{f(w)}" android:strokeLineCap="round" android:strokeLineJoin="round"'
+        else:
+            attr = 'android:fillColor="#FFFF6A1F"' if dot else 'android:fillColor="#FFFFFFFF"'
+        path = f'<path android:pathData="{d}" {attr} />'
+        if rot: path = f'<group android:rotation="{f(rot[0])}" android:pivotX="{f(rot[1])}" android:pivotY="{f(rot[2])}">{path}</group>'
+        rows.append('    ' + path)
+    return chr(10).join(['<?xml version="1.0" encoding="utf-8"?>',
+        f'<!-- Wygenerowane z {name} skryptem generuj_kotlin.py. -->',
+        '<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp"'
+        ' android:viewportWidth="24" android:viewportHeight="24">'] + rows + ['</vector>', ''])
+
+
+if mode == 'widzet':
+    import os
+    resdir, packs = src, sys.argv[4:]
+    for old in os.listdir(resdir):
+        if old.startswith('wi_'): os.remove(os.path.join(resdir, old))
+    entries = []
+    for pack in packs:
+        sdir = pack + '/svg/jasne-tlo/'
+        for fn in sorted(os.listdir(sdir)):
+            stem = fn[:-4]
+            if not fn.endswith('.svg') or stem.startswith(('ui-', 'tab-', 'akcja-', 'motyw-', 'powiad-')): continue
+            res = 'wi_' + stem.replace('-', '_')
+            parts = parts_of(sdir + fn)
+            open(os.path.join(resdir, res + '_l.xml'), 'w', encoding='utf-8').write(vector_xml(parts, fn, False))
+            open(os.path.join(resdir, res + '_d.xml'), 'w', encoding='utf-8').write(vector_xml(parts, fn, True))
+            entries.append((stem, res))
+    o = ['package pl.sportfamily.app.widget', '',
+         '// Wygenerowane skryptem branding/ikony_zajecia/generuj_kotlin.py (tryb widzet). Nie edytuj ręcznie.', '',
+         'import pl.sportfamily.app.R', '',
+         '/** Ikony do widżetu: klucz ikony -> (linia do barwienia, pomarańczowa kropka). */',
+         'val WidgetIcons: Map<String, Pair<Int, Int>> = mapOf(']
+    o += [f'    "{k}" to (R.drawable.{r}_l to R.drawable.{r}_d),' for k, r in entries]
+    o += [')', '']
+    open(out, 'w', encoding='utf-8').write(chr(10).join(o))
+    print(out, len(entries), 'ikon'); sys.exit(0)
+
 if mode == 'drawable':
     # Mała ikona powiadomienia: wszystko białe (Android maluje ją jednym kolorem).
     rows = []
@@ -130,7 +176,7 @@ if mode == 'zajecia':
          'val ActivityIcons: List<ActivityIcon> by lazy {', '    listOf(']
     for m in meta:
         keys = ', '.join('"%s"' % k for k in m['slowa_kluczowe'])
-        o.append(f'        ActivityIcon("{m["nazwa"]}", "{m["grupa"]}", listOf({keys}), listOf(')
+        o.append(f'        ActivityIcon("{m["plik"][:-4]}", "{m["nazwa"]}", "{m["grupa"]}", listOf({keys}), listOf(')
         o.append(kt_parts(parts_of(svg + m['plik']), '            '))
         o.append('        )),')
     o.append('    )\n}\n')
@@ -144,7 +190,7 @@ else:
          f'val {valname}: Map<String, ActivityIcon> by lazy {{', '    mapOf(']
     for plik, nazwa, grupa, keys in files:
         k = ', '.join('"%s"' % x for x in keys)
-        o.append(f'        "{plik[:-4]}" to ActivityIcon("{nazwa}", "{grupa}", listOf({k}), listOf(')
+        o.append(f'        "{plik[:-4]}" to ActivityIcon("{plik[:-4]}", "{nazwa}", "{grupa}", listOf({k}), listOf(')
         o.append(kt_parts(parts_of(svg + plik), '            '))
         o.append('        )),')
     o.append('    )\n}\n')

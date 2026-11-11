@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z baseball.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M4.500 19.500L13 11M3.300 18.300l2.400 2.400" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <group android:rotation="-45" android:pivotX="16" android:pivotY="8"><path android:pathData="M13.5,6h5a2,2 0 0 1 2,2v0a2,2 0 0 1 -2,2h-5a2,2 0 0 1 -2,-2v-0a2,2 0 0 1 2,-2Z" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" /></group>
+</vector>

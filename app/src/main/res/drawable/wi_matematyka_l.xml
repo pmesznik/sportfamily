@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z matematyka.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M4 7h6M7 4v6M14 7h6M4.500 14.500l5 5M9.500 14.500l-5 5M14 17h6" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <path android:pathData="M15.8,20.4a1.2,1.2 0 1,0 2.4,0a1.2,1.2 0 1,0 -2.4,0Z" android:fillColor="#FFFFFFFF" />
+</vector>

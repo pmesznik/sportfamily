@@ -69,8 +69,9 @@ class RemindersTest {
     @Test fun allDayTestGetsMorningReminder() {
         val test = EventEntity(id = 4, title = "Sprawdzian z matmy", category = Category.SCHOOL, schoolKind = SchoolKind.TEST,
             startDay = day.toEpochDay(), allDay = true)
-        val r = plan(data(test)).single()
-        assertEquals(ReminderKind.MORNING, r.kind)
+        val all = plan(data(test))
+        assertEquals(setOf(ReminderKind.MORNING, ReminderKind.SCHOOL_TASK), all.map { it.kind }.toSet())
+        val r = all.single { it.kind == ReminderKind.MORNING }
         assertEquals(at(7), r.at)
         assertEquals("Sprawdzian", r.text)
     }

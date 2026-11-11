@@ -23,6 +23,7 @@ object ReminderSettings {
             packingHour = p.getInt("packingHour", d.packingHour),
             morning = p.getBoolean("morning", d.morning),
             morningHour = p.getInt("morningHour", d.morningHour),
+            schoolTasks = p.getBoolean("schoolTasks", d.schoolTasks),
             me = p.getLong("me", -1L).takeIf { it > 0 },
         )
         _prefs.value = v
@@ -36,6 +37,7 @@ object ReminderSettings {
             .putBoolean("start", v.start).putInt("startLead", v.startLead)
             .putBoolean("packing", v.packing).putInt("packingHour", v.packingHour)
             .putBoolean("morning", v.morning).putInt("morningHour", v.morningHour)
+            .putBoolean("schoolTasks", v.schoolTasks)
             .putLong("me", v.me ?: -1L)
             .apply()
         ReminderScheduler.requestRefresh(context)

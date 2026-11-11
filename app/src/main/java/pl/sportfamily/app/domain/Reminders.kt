@@ -22,11 +22,13 @@ data class ReminderPrefs(
     /** Poranne przypomnienie o całodniowych terminach (sprawdzian, wycieczka, strój galowy). */
     val morning: Boolean = true,
     val morningHour: Int = 7,
+    /** Kartkówki, sprawdziany, prace domowe i projekty: przypomnienie wieczorem dzień wcześniej (o godzinie pakowania). */
+    val schoolTasks: Boolean = true,
     /** Osoba, która używa tego telefonu. Ustawiona: o wyjazdach i odbiorach przypominamy tylko jej. */
     val me: Long? = null,
 )
 
-enum class ReminderKind { DEPARTURE, PICKUP, START, PACKING, MORNING }
+enum class ReminderKind { DEPARTURE, PICKUP, START, PACKING, MORNING, SCHOOL_TASK }
 
 /**
  * Jedno przypomnienie. [at] to chwila pokazania, [deadline] to moment, po którym nie ma sensu go pokazywać
@@ -69,7 +71,7 @@ object ReminderPlanner {
                     val at = dep.minusMinutes(prefs.travelLead.toLong())
                     out += Reminder(key(o, ReminderKind.DEPARTURE), ReminderKind.DEPARTURE, at, o.start,
                         o, "Wyjazd o ${dep.format(HM)}: $title$kids", departureText(o))
-                } else if (prefs.start && dep == null && o.stayFrom == null) {
+                } else if (prefs.start && dep == null && o.stayFrom == null && !SchoolTasks.isTask(o.event)) {
                     val at = o.start.minusMinutes(prefs.startLead.toLong())
                     out += Reminder(key(o, ReminderKind.START), ReminderKind.START, at, o.start,
                         o, "O ${o.start.format(HM)}: $title$kids", listOfNotNull(o.event.placeName.ifBlank { null }, o.alsoTake.ifBlank { null }?.let { "Zabierz też: $it" }).joinToString(" · ").ifBlank { "Za ${prefs.startLead} min" })
@@ -83,6 +85,16 @@ object ReminderPlanner {
                         "Wyjazd po dziecko o ${leave.format(HM)}" + (o.pickUp?.let { " · odbiera ${it.name}" } ?: " · nikt nie odbiera!") +
                             (o.event.placeName.ifBlank { null }?.let { " · $it" } ?: ""))
                 }
+            }
+
+            // Kartkówka, sprawdzian, praca domowa, projekt: wieczorem dzień wcześniej, z zakresem materiału.
+            if (prefs.schoolTasks && SchoolTasks.isTask(o.event)) {
+                val at = o.date.minusDays(1).atTime(prefs.packingHour, 0)
+                val kind = SchoolTasks.label(o.event.schoolKind!!).lowercase()
+                val subject = o.event.title.substringAfter(':', o.event.title).trim()
+                out += Reminder(key(o, ReminderKind.SCHOOL_TASK), ReminderKind.SCHOOL_TASK, at, o.start,
+                    o, "Jutro $kind: $subject$kids",
+                    listOfNotNull(o.event.notes.ifBlank { null }, if (o.allDay) null else "lekcja o ${o.start.format(HM)}").joinToString(" · "))
             }
 
             // Pakowanie wieczorem dzień wcześniej, gdy lista rzeczy nie jest jeszcze odhaczona.

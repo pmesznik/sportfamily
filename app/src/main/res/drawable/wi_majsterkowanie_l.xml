@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Wygenerowane z majsterkowanie.svg skryptem generuj_kotlin.py. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <path android:pathData="M4 20l9.500-9.500" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" />
+    <group android:rotation="45" android:pivotX="15" android:pivotY="9"><path android:pathData="M11.5,6.5h7a1.5,1.5 0 0 1 1.5,1.5v2a1.5,1.5 0 0 1 -1.5,1.5h-7a1.5,1.5 0 0 1 -1.5,-1.5v-2a1.5,1.5 0 0 1 1.5,-1.5Z" android:strokeColor="#FFFFFFFF" android:strokeWidth="2" android:strokeLineCap="round" android:strokeLineJoin="round" /></group>
+</vector>
